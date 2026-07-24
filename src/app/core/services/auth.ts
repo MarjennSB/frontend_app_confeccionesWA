@@ -20,6 +20,7 @@ export class AuthService {
     return this.http.post<LoginResponseDto>(this.authUrl, credentials).pipe(
       tap((r) => {
         this.tokenService.saveToken(r.access_token);
+        this.tokenService.saveUser(r.user);
       })
     );
   }

@@ -17,6 +17,7 @@ export class Login {
 
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly currentYear = new Date().getFullYear();
 
   readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -36,7 +37,7 @@ export class Login {
 
     this.authService.login(credentials).subscribe({
       next: () => {
-        this.router.navigate(['/landlords']);
+        this.router.navigate(['/dashboard']);
         this.isLoading.set(false);
       },
       error: (err) => {
