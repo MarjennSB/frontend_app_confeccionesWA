@@ -1,25 +1,19 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AreasService } from '../../../core/services/areas.service';
-import { Area, UpdateAreaDto } from '../../../core/models/area.model';
-
-interface AreaForm {
-  acronym: string;
-  name: string;
-  area_father_id?: number;
-  is_active: boolean;
-}
+import { Area } from '../../../core/models/area.model';
 
 declare const bootstrap: any;
 
 @Component({
   selector: 'app-areas-list',
   standalone: true,
-  imports: [FormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './areas-list.html',
 })
 export class AreasListComponent implements OnInit {
   private readonly areasService = inject(AreasService);
+  private readonly fb = inject(FormBuilder);
 
   areas = signal<Area[]>([]);
   filteredAreas = signal<Area[]>([]);
@@ -27,14 +21,21 @@ export class AreasListComponent implements OnInit {
   errorMsg = signal<string | null>(null);
   successMsg = signal<string | null>(null);
 
-  // Formulario crear/editar
   isEditing = signal(false);
   editingId = signal<number | null>(null);
-  form = signal<AreaForm>({ acronym: '', name: '', area_father_id: undefined, is_active: true });
 
-  // Búsqueda
   searchTerm = signal('');
 
+  readonly areaForm = this.fb.nonNullable.group({
+    acronym: ['', [Validators.required, Validators.maxLength(20)]],
+    name: ['', [Validators.required, Validators.maxLength(200)]],
+    area_father_id: [null as number | null],
+    is_active: [true],
+  });
+
+  get parentAreas(): Area[] {
+    return this.areas().filter((a) => a.id !== this.editingId());
+  }
 
   ngOnInit(): void {
     this.loadAreas();
@@ -78,58 +79,41 @@ export class AreasListComponent implements OnInit {
   openCreateModal(): void {
     this.isEditing.set(false);
     this.editingId.set(null);
-    this.form.set({ acronym: '', name: '', area_father_id: undefined, is_active: true });
+    this.areaForm.reset({ acronym: '', name: '', area_father_id: null, is_active: true });
     this.errorMsg.set(null);
-    this.getCreateModal().show();
+    this.getModal().show();
   }
 
   openEditModal(area: Area): void {
     this.isEditing.set(true);
     this.editingId.set(area.id);
-    this.form.set({
+    this.areaForm.reset({
       acronym: area.acronym,
       name: area.name,
-      area_father_id: area.parent?.id,
+      area_father_id: area.parent?.id ?? null,
       is_active: area.is_active,
     });
     this.errorMsg.set(null);
-    this.getCreateModal().show();
-  }
-
-  onFormAcronymChange(value: string): void {
-    this.form.update((f) => ({ ...f, acronym: value }));
-  }
-
-  onFormNameChange(value: string): void {
-    this.form.update((f) => ({ ...f, name: value }));
-  }
-
-  onFormParentChange(value: string): void {
-    const id = value ? +value : undefined;
-    this.form.update((f) => ({ ...f, area_father_id: id }));
-  }
-
-  onFormStatusChange(value: string): void {
-    this.form.update((f) => ({ ...f, is_active: value === 'true' }));
+    this.getModal().show();
   }
 
   saveArea(): void {
-    const f = this.form();
-    if (!f.acronym.trim() || !f.name.trim()) {
-      this.errorMsg.set('La sigla y el nombre son obligatorios.');
+    if (this.areaForm.invalid) {
+      this.areaForm.markAllAsTouched();
       return;
     }
 
+    const { acronym, name, area_father_id, is_active } = this.areaForm.getRawValue();
+
     if (this.isEditing()) {
-      const dto: UpdateAreaDto = {
-        acronym: f.acronym,
-        name: f.name,
-        area_father_id: f.area_father_id ?? null,
-        is_active: f.is_active,
-      };
-      this.areasService.update(this.editingId()!, dto).subscribe({
+      this.areasService.update(this.editingId()!, {
+        acronym,
+        name,
+        area_father_id: area_father_id ?? null,
+        is_active,
+      }).subscribe({
         next: () => {
-          this.getCreateModal().hide();
+          this.getModal().hide();
           this.showSuccess('Área actualizada correctamente.');
           this.loadAreas();
         },
@@ -138,9 +122,13 @@ export class AreasListComponent implements OnInit {
         },
       });
     } else {
-      this.areasService.create(f).subscribe({
+      this.areasService.create({
+        acronym,
+        name,
+        area_father_id: area_father_id ?? undefined,
+      }).subscribe({
         next: () => {
-          this.getCreateModal().hide();
+          this.getModal().hide();
           this.showSuccess('Área creada correctamente.');
           this.loadAreas();
         },
@@ -151,8 +139,9 @@ export class AreasListComponent implements OnInit {
     }
   }
 
-  get parentAreas(): Area[] {
-    return this.areas().filter((a) => a.id !== this.editingId());
+  isFieldInvalid(field: 'acronym' | 'name'): boolean {
+    const control = this.areaForm.controls[field];
+    return control.invalid && control.touched;
   }
 
   private showSuccess(msg: string): void {
@@ -160,7 +149,7 @@ export class AreasListComponent implements OnInit {
     setTimeout(() => this.successMsg.set(null), 3000);
   }
 
-  private getCreateModal(): any {
+  private getModal(): any {
     return bootstrap.Modal.getOrCreateInstance(document.getElementById('areaModal'));
   }
 }
