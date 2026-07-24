@@ -124,7 +124,7 @@ export class AreasListComponent implements OnInit {
       const dto: UpdateAreaDto = {
         acronym: f.acronym,
         name: f.name,
-        area_father_id: f.area_father_id,
+        area_father_id: f.area_father_id ?? null,
         is_active: f.is_active,
       };
       this.areasService.update(this.editingId()!, dto).subscribe({

@@ -18,6 +18,6 @@ export interface CreateAreaDto {
 export interface UpdateAreaDto {
   acronym?: string;
   name?: string;
-  area_father_id?: number;
+  area_father_id?: number | null;
   is_active?: boolean;
 }
