@@ -8,6 +8,7 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './topbar.component.html',
+  styles: [':host { display: contents; }'],
 })
 export class TopbarComponent {
   private readonly authService = inject(AuthService);

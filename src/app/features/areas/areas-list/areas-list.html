@@ -1,0 +1,234 @@
+<!-- start page title -->
+<div class="row">
+      <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+          <h4 class="mb-sm-0">Áreas</h4>
+          <div class="page-title-right">
+            <ol class="breadcrumb m-0">
+              <li class="breadcrumb-item"><a href="javascript: void(0);">Catálogos</a></li>
+              <li class="breadcrumb-item active">Áreas</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- end page title -->
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card" id="areasList">
+
+          <div class="card-header border-0">
+            <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0 flex-grow-1">Listado de Áreas</h5>
+              <div class="flex-shrink-0">
+                <div class="d-flex flex-wrap gap-2">
+                  <button class="btn btn-danger add-btn" (click)="openCreateModal()">
+                    <i class="ri-add-line align-bottom me-1"></i> Nueva Área
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body border border-dashed border-end-0 border-start-0">
+            <form>
+              <div class="row g-3">
+                <div class="col-xxl-5 col-sm-12">
+                  <div class="search-box">
+                    <input
+                      type="text"
+                      class="form-control search bg-light border-light"
+                      placeholder="Buscar por nombre o sigla..."
+                      [value]="searchTerm()"
+                      (input)="onSearch($any($event.target).value)"
+                    >
+                    <i class="ri-search-line search-icon"></i>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <!--end card-body-->
+
+          <div class="card-body">
+            <div class="table-responsive table-card mb-4">
+              <table class="table align-middle table-nowrap mb-0" id="areasTable">
+                <thead class="table-light text-muted">
+                  <tr>
+                    <th scope="col" style="width: 50px;">#</th>
+                    <th class="sort">Sigla</th>
+                    <th class="sort">Nombre</th>
+                    <th class="sort">Área Padre</th>
+                    <th class="sort">Estado</th>
+                    <th class="sort">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody class="list form-check-all">
+
+                  @if (isLoading()) {
+                    <tr>
+                      <td colspan="6" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Cargando...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+
+                  @for (area of filteredAreas(); track area.id; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>
+                        <span class="badge bg-primary-subtle text-primary fs-12">{{ area.acronym }}</span>
+                      </td>
+                      <td class="fw-medium">{{ area.name }}</td>
+                      <td>
+                        @if (area.parent) {
+                          <span class="text-muted">{{ area.parent.name }}</span>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </td>
+                      <td>
+                        @if (area.is_active) {
+                          <span class="badge bg-success-subtle text-success text-uppercase">Activo</span>
+                        } @else {
+                          <span class="badge bg-danger-subtle text-danger text-uppercase">Inactivo</span>
+                        }
+                      </td>
+                      <td>
+                        <ul class="list-inline tasks-list-menu mb-0">
+                          <li class="list-inline-item">
+                            <a class="edit-item-btn" href="javascript:void(0)" (click)="openEditModal(area)">
+                              <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
+                            </a>
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                  }
+
+                </tbody>
+              </table>
+              <!--end table-->
+
+              @if (!isLoading() && filteredAreas().length === 0) {
+                <div class="noresult">
+                  <div class="text-center">
+                    <h5 class="mt-2">No se encontraron resultados</h5>
+                    <p class="text-muted mb-0">No hay áreas que coincidan con la búsqueda.</p>
+                  </div>
+                </div>
+              }
+
+            </div>
+          </div>
+          <!--end card-body-->
+
+        </div>
+        <!--end card-->
+      </div>
+      <!--end col-->
+    </div>
+    <!--end row-->
+
+    <!-- ========== Modal Crear / Editar ========== -->
+    <div class="modal fade zoomIn" id="areaModal" tabindex="-1" aria-labelledby="areaModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0">
+          <div class="modal-header p-3 bg-info-subtle">
+            <h5 class="modal-title" id="areaModalLabel">
+              {{ isEditing() ? 'Editar Área' : 'Nueva Área' }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form class="tablelist-form" autocomplete="off">
+            <div class="modal-body">
+
+              @if (errorMsg()) {
+                <div class="alert alert-danger py-2 mb-3">{{ errorMsg() }}</div>
+              }
+
+              <div class="row g-3">
+                <div class="col-lg-4">
+                  <label for="acronym-field" class="form-label">Sigla <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    id="acronym-field"
+                    class="form-control"
+                    placeholder="Ej: OGA"
+                    maxlength="20"
+                    [value]="form().acronym"
+                    (input)="onFormAcronymChange($any($event.target).value)"
+                  >
+                </div>
+                <div class="col-lg-8">
+                  <label for="name-field" class="form-label">Nombre <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    id="name-field"
+                    class="form-control"
+                    placeholder="Nombre completo del área"
+                    maxlength="200"
+                    [value]="form().name"
+                    (input)="onFormNameChange($any($event.target).value)"
+                  >
+                </div>
+                <div class="col-lg-12">
+                  <label for="parent-field" class="form-label">Área Padre <span class="text-muted fs-12">(opcional)</span></label>
+                  <select
+                    id="parent-field"
+                    class="form-control"
+                    [value]="form().area_father_id ?? ''"
+                    (change)="onFormParentChange($any($event.target).value)"
+                  >
+                    <option value="">Sin área padre</option>
+                    @for (a of parentAreas; track a.id) {
+                      <option [value]="a.id">{{ a.acronym }} - {{ a.name }}</option>
+                    }
+                  </select>
+                </div>
+                @if (isEditing()) {
+                  <div class="col-lg-12">
+                    <label for="status-field" class="form-label">Estado</label>
+                    <select
+                      id="status-field"
+                      class="form-control"
+                      [value]="form().is_active ? 'true' : 'false'"
+                      (change)="onFormStatusChange($any($event.target).value)"
+                    >
+                      <option value="true">Activo</option>
+                      <option value="false">Inactivo</option>
+                    </select>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div class="hstack gap-2 justify-content-end">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" (click)="saveArea()">
+                  {{ isEditing() ? 'Actualizar' : 'Guardar' }}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!--end create/edit modal-->
+
+    <!-- Alerta éxito flotante -->
+    @if (successMsg()) {
+      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div class="toast show align-items-center text-bg-success border-0" role="alert">
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="ri-checkbox-circle-line me-2"></i>{{ successMsg() }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="successMsg.set(null)"></button>
+          </div>
+        </div>
+      </div>
+    }
