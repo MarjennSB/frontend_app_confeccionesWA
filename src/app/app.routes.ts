@@ -24,6 +24,10 @@ export const routes: Routes = [
             {
                 path: 'areas',
                 loadComponent: () => import('./features/areas/areas-list/areas-list').then(c => c.AreasListComponent)
+            },
+            {
+                path: 'responsible-officer',
+                loadComponent: () => import('./features/responsible-officer/responsible-officer-list/responsible-officer-list').then(c => c.ResponsibleOfficerListComponent)
             }
         ]
     },

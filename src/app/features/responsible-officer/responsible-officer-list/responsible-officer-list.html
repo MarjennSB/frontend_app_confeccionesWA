@@ -1,0 +1,226 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">Funcionarios Responsables</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="javascript: void(0);">Catálogos</a></li>
+          <li class="breadcrumb-item active">Funcionarios</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card" id="officersList">
+
+      <div class="card-header border-0">
+        <div class="d-flex align-items-center">
+          <h5 class="card-title mb-0 flex-grow-1">Listado de Funcionarios</h5>
+          <div class="flex-shrink-0">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-danger add-btn" (click)="openCreateModal()">
+                <i class="ri-add-line align-bottom me-1"></i> Nuevo Funcionario
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body border border-dashed border-end-0 border-start-0">
+        <form>
+          <div class="row g-3">
+            <div class="col-xxl-5 col-sm-12">
+              <div class="search-box">
+                <input
+                  type="text"
+                  class="form-control search bg-light border-light"
+                  placeholder="Buscar por nombre, cédula o iniciales..."
+                  [value]="searchTerm()"
+                  (input)="onSearch($any($event.target).value)"
+                >
+                <i class="ri-search-line search-icon"></i>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card-body">
+        <div class="table-responsive table-card mb-4">
+          <table class="table align-middle table-nowrap mb-0" id="officersTable">
+            <thead class="table-light text-muted">
+              <tr>
+                <th scope="col" style="width: 50px;">#</th>
+                <th class="sort">Cédula</th>
+                <th class="sort">Nombre</th>
+                <th class="sort">Iniciales</th>
+                <th class="sort">Estado</th>
+                <th class="sort">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="list form-check-all">
+
+              @if (isLoading()) {
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando...</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              @for (officer of filteredOfficers(); track officer.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td class="fw-medium">{{ officer.document_number }}</td>
+                  <td>{{ officer.name }}</td>
+                  <td>
+                    <span class="badge bg-primary-subtle text-primary fs-12">{{ officer.initials }}</span>
+                  </td>
+                  <td>
+                    @if (officer.is_active) {
+                      <span class="badge bg-success-subtle text-success text-uppercase">Activo</span>
+                    } @else {
+                      <span class="badge bg-danger-subtle text-danger text-uppercase">Inactivo</span>
+                    }
+                  </td>
+                  <td>
+                    <ul class="list-inline tasks-list-menu mb-0">
+                      <li class="list-inline-item">
+                        <a class="edit-item-btn" href="javascript:void(0)" (click)="openEditModal(officer)">
+                          <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
+                        </a>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              }
+
+            </tbody>
+          </table>
+
+          @if (!isLoading() && filteredOfficers().length === 0) {
+            <div class="noresult">
+              <div class="text-center">
+                <h5 class="mt-2">No se encontraron resultados</h5>
+                <p class="text-muted mb-0">No hay funcionarios que coincidan con la búsqueda.</p>
+              </div>
+            </div>
+          }
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ========== Modal Crear / Editar ========== -->
+<div class="modal fade zoomIn" id="officerModal" tabindex="-1" aria-labelledby="officerModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0">
+      <div class="modal-header p-3 bg-info-subtle">
+        <h5 class="modal-title" id="officerModalLabel">
+          {{ isEditing() ? 'Editar Funcionario' : 'Nuevo Funcionario' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="tablelist-form" autocomplete="off" [formGroup]="officerForm" (ngSubmit)="saveOfficer()">
+        <div class="modal-body">
+
+          @if (errorMsg()) {
+            <div class="alert alert-danger py-2 mb-3">{{ errorMsg() }}</div>
+          }
+
+          <div class="row g-3">
+            <div class="col-lg-4">
+              <label for="document-field" class="form-label">Cédula <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                id="document-field"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('document_number')"
+                placeholder="Ej: 1234567890"
+                maxlength="20"
+                formControlName="document_number"
+              >
+              @if (isFieldInvalid('document_number')) {
+                <div class="invalid-feedback">La cédula es obligatoria.</div>
+              }
+            </div>
+            <div class="col-lg-5">
+              <label for="name-field" class="form-label">Nombre completo <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                id="name-field"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('name')"
+                placeholder="Nombres y apellidos"
+                maxlength="200"
+                formControlName="name"
+              >
+              @if (isFieldInvalid('name')) {
+                <div class="invalid-feedback">El nombre es obligatorio.</div>
+              }
+            </div>
+            <div class="col-lg-3">
+              <label for="initials-field" class="form-label">Iniciales <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                id="initials-field"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('initials')"
+                placeholder="Ej: J.P.G."
+                maxlength="20"
+                formControlName="initials"
+              >
+              @if (isFieldInvalid('initials')) {
+                <div class="invalid-feedback">Las iniciales son obligatorias.</div>
+              }
+            </div>
+            <div class="col-lg-12">
+              <label for="status-field" class="form-label">Estado</label>
+              <select
+                id="status-field"
+                class="form-control"
+                formControlName="is_active"
+              >
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="hstack gap-2 justify-content-end">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-success">
+              {{ isEditing() ? 'Actualizar' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<!-- Alerta éxito flotante -->
+@if (successMsg()) {
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div class="toast show align-items-center text-bg-success border-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <i class="ri-checkbox-circle-line me-2"></i>{{ successMsg() }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="successMsg.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
