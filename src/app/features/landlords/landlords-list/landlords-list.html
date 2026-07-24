@@ -1,0 +1,322 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">Locadores</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="javascript: void(0);">Catálogos</a></li>
+          <li class="breadcrumb-item active">Locadores</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card" id="landlordsList">
+
+      <div class="card-header border-0">
+        <div class="d-flex align-items-center">
+          <h5 class="card-title mb-0 flex-grow-1">Listado de Locadores</h5>
+          <div class="flex-shrink-0">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-danger add-btn" (click)="openCreateModal()">
+                <i class="ri-add-line align-bottom me-1"></i> Nuevo Locador
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body border border-dashed border-end-0 border-start-0">
+        <form>
+          <div class="row g-3">
+            <div class="col-xxl-5 col-sm-12">
+              <div class="search-box">
+                <input
+                  type="text"
+                  class="form-control search bg-light border-light"
+                  placeholder="Buscar por nombre, documento o email..."
+                  [value]="searchTerm()"
+                  (input)="onSearch($any($event.target).value)"
+                >
+                <i class="ri-search-line search-icon"></i>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card-body">
+        <div class="table-responsive table-card mb-4">
+          <table class="table align-middle table-nowrap mb-0" id="landlordsTable">
+            <thead class="table-light text-muted">
+              <tr>
+                <th scope="col" style="width: 50px;">#</th>
+                <th class="sort">Tipo Doc.</th>
+                <th class="sort">N° Documento</th>
+                <th class="sort">Nombre</th>
+                <th class="sort">Email</th>
+                <th class="sort">Teléfono</th>
+                <th class="sort">Estado</th>
+                <th class="sort">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="list form-check-all">
+
+              @if (isLoading()) {
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando...</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              @for (landlord of filteredLandlords(); track landlord.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    @if (landlord.type_document) {
+                      <span class="badge bg-info-subtle text-info">{{ landlord.type_document.acronym }}</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td class="fw-medium">{{ landlord.document_number }}</td>
+                  <td>
+                    {{ getLandlordDisplayName(landlord) }}
+                  </td>
+                  <td>
+                    @if (landlord.email) {
+                      <span class="text-muted">{{ landlord.email }}</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    @if (landlord.phone) {
+                      <span class="text-muted">{{ landlord.phone }}</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    @if (landlord.is_active) {
+                      <span class="badge bg-success-subtle text-success text-uppercase">Activo</span>
+                    } @else {
+                      <span class="badge bg-danger-subtle text-danger text-uppercase">Inactivo</span>
+                    }
+                  </td>
+                  <td>
+                    <ul class="list-inline tasks-list-menu mb-0">
+                      <li class="list-inline-item">
+                        <a class="edit-item-btn" href="javascript:void(0)" (click)="openEditModal(landlord)">
+                          <i class="ri-pencil-fill align-bottom me-2 text-muted"></i>
+                        </a>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              }
+
+            </tbody>
+          </table>
+
+          @if (!isLoading() && filteredLandlords().length === 0) {
+            <div class="noresult">
+              <div class="text-center">
+                <h5 class="mt-2">No se encontraron resultados</h5>
+                <p class="text-muted mb-0">No hay locadores que coincidan con la búsqueda.</p>
+              </div>
+            </div>
+          }
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ========== Modal Crear / Editar ========== -->
+<div class="modal fade zoomIn" id="landlordModal" tabindex="-1" aria-labelledby="landlordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0">
+      <div class="modal-header p-3 bg-info-subtle">
+        <h5 class="modal-title" id="landlordModalLabel">
+          {{ isEditing() ? 'Editar Locador' : 'Nuevo Locador' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="tablelist-form" autocomplete="off" [formGroup]="landlordForm" (ngSubmit)="saveLandlord()">
+        <div class="modal-body">
+
+          @if (errorMsg()) {
+            <div class="alert alert-danger py-2 mb-3">{{ errorMsg() }}</div>
+          }
+
+          <div class="row g-3">
+            <div class="col-lg-4">
+              <label for="type-doc-field" class="form-label">Tipo de Documento</label>
+              <select
+                id="type-doc-field"
+                class="form-control"
+                formControlName="type_document_id"
+              >
+                <option [ngValue]="null">Seleccionar tipo</option>
+                @for (td of typeDocuments(); track td.id) {
+                  <option [ngValue]="td.id">{{ td.acronym }} - {{ td.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-lg-8">
+              <label for="doc-number-field" class="form-label">N° Documento <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                id="doc-number-field"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('document_number')"
+                placeholder="Ej: 12345678"
+                maxlength="20"
+                formControlName="document_number"
+              >
+              @if (isFieldInvalid('document_number')) {
+                <div class="invalid-feedback">El número de documento es obligatorio.</div>
+              }
+            </div>
+            <!-- RUC: razón social -->
+            @if (isRuc()) {
+              <div class="col-lg-12">
+                <label for="razon-social-field" class="form-label">Razón Social <span class="text-danger">*</span></label>
+                <input
+                  type="text"
+                  id="razon-social-field"
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('razon_social')"
+                  placeholder="Razón social de la empresa"
+                  maxlength="200"
+                  formControlName="razon_social"
+                >
+                @if (isFieldInvalid('razon_social')) {
+                  <div class="invalid-feedback">La razón social es obligatoria.</div>
+                }
+              </div>
+            }
+
+            <!-- Persona natural: nombres, apellido paterno, apellido materno -->
+            @if (!isRuc()) {
+              <div class="col-lg-12">
+                <label for="first-name-field" class="form-label">Nombres <span class="text-danger">*</span></label>
+                <input
+                  type="text"
+                  id="first-name-field"
+                  class="form-control"
+                  placeholder="Nombres"
+                  maxlength="200"
+                  formControlName="first_name"
+                >
+              </div>
+              <div class="col-lg-6">
+                <label for="last-name-field" class="form-label">Apellido Paterno <span class="text-danger">*</span></label>
+                <input
+                  type="text"
+                  id="last-name-field"
+                  class="form-control"
+                  placeholder="Apellido paterno"
+                  maxlength="200"
+                  formControlName="last_name"
+                >
+              </div>
+              <div class="col-lg-6">
+                <label for="last-name-mother-field" class="form-label">Apellido Materno</label>
+                <input
+                  type="text"
+                  id="last-name-mother-field"
+                  class="form-control"
+                  placeholder="Apellido materno"
+                  maxlength="200"
+                  formControlName="last_name_mother"
+                >
+              </div>
+            }
+            <div class="col-lg-6">
+              <label for="email-field" class="form-label">Email <span class="text-muted fs-12">(opcional)</span></label>
+              <input
+                type="email"
+                id="email-field"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('email')"
+                placeholder="correo@ejemplo.com"
+                maxlength="150"
+                formControlName="email"
+              >
+              @if (isFieldInvalid('email')) {
+                <div class="invalid-feedback">El formato del email no es válido.</div>
+              }
+            </div>
+            <div class="col-lg-6">
+              <label for="phone-field" class="form-label">Teléfono <span class="text-muted fs-12">(opcional)</span></label>
+              <input
+                type="text"
+                id="phone-field"
+                class="form-control"
+                placeholder="Ej: 999888777"
+                maxlength="20"
+                formControlName="phone"
+              >
+            </div>
+            <div class="col-lg-12">
+              <label for="address-field" class="form-label">Dirección <span class="text-muted fs-12">(opcional)</span></label>
+              <textarea
+                id="address-field"
+                class="form-control"
+                placeholder="Dirección completa"
+                rows="2"
+                formControlName="address"
+              ></textarea>
+            </div>
+            <div class="col-lg-12">
+              <label for="status-field" class="form-label">Estado</label>
+              <select
+                id="status-field"
+                class="form-control"
+                formControlName="is_active"
+              >
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="hstack gap-2 justify-content-end">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-success">
+              {{ isEditing() ? 'Actualizar' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!--end modal-->
+
+<!-- Alerta éxito flotante -->
+@if (successMsg()) {
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div class="toast show align-items-center text-bg-success border-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <i class="ri-checkbox-circle-line me-2"></i>{{ successMsg() }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="successMsg.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}

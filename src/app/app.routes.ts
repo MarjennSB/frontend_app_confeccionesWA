@@ -28,6 +28,14 @@ export const routes: Routes = [
             {
                 path: 'responsible-officer',
                 loadComponent: () => import('./features/responsible-officer/responsible-officer-list/responsible-officer-list').then(c => c.ResponsibleOfficerListComponent)
+            },
+            {
+                path: 'parameters',
+                loadComponent: () => import('./features/parameters/parameters-list/parameters-list').then(c => c.ParametersListComponent)
+            },
+            {
+                path: 'landlords',
+                loadComponent: () => import('./features/landlords/landlords-list/landlords-list').then(c => c.LandlordsListComponent)
             }
         ]
     },
