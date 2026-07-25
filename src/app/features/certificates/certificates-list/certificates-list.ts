@@ -85,4 +85,18 @@ export class CertificatesListComponent implements OnInit {
     if (!num) return '—';
     return num.padStart(4, '0');
   }
+
+  downloadWord(cert: Certificate): void {
+    this.certificatesService.downloadWord(cert.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `constancia-${this.formatNumber(cert.certificate_number)}-${cert.certificate_year}.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.errorMsg.set('Error al descargar la constancia.'),
+    });
+  }
 }

@@ -20,4 +20,8 @@ export class CertificatesService {
   getById(id: string): Observable<Certificate> {
     return this.http.get<Certificate>(`${this.baseUrl}/${id}`);
   }
+
+  downloadWord(id: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/download`, { responseType: 'blob' });
+  }
 }

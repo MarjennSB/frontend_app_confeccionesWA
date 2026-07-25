@@ -98,14 +98,24 @@
                     }
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-info"
-                      (click)="openDetail(cert)"
-                      title="Ver detalle"
-                    >
-                      <i class="ri-eye-line"></i>
-                    </button>
+                    <div class="d-flex gap-1">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-info"
+                        (click)="openDetail(cert)"
+                        title="Ver detalle"
+                      >
+                        <i class="ri-eye-line"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-success"
+                        (click)="downloadWord(cert)"
+                        title="Descargar Word"
+                      >
+                        <i class="ri-file-word-line"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               }
