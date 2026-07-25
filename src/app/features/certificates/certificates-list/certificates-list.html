@@ -1,0 +1,253 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">Constancias Generadas</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="javascript: void(0);">Certificados</a></li>
+          <li class="breadcrumb-item active">Constancias</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card" id="certificatesList">
+
+      <div class="card-header border-0">
+        <div class="d-flex align-items-center">
+          <h5 class="card-title mb-0 flex-grow-1">Listado de Constancias</h5>
+        </div>
+      </div>
+
+      <div class="card-body border border-dashed border-end-0 border-start-0">
+        <form>
+          <div class="row g-3">
+            <div class="col-xxl-5 col-sm-12">
+              <div class="search-box">
+                <input
+                  type="text"
+                  class="form-control search bg-light border-light"
+                  placeholder="Buscar por N° constancia, locador, expediente, responsable..."
+                  [value]="searchTerm()"
+                  (input)="onSearch($any($event.target).value)"
+                >
+                <i class="ri-search-line search-icon"></i>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card-body">
+        <div class="table-responsive table-card mb-4">
+          <table class="table align-middle table-nowrap mb-0">
+            <thead class="table-light text-muted">
+              <tr>
+                <th style="width: 50px;">#</th>
+                <th>N° Constancia</th>
+                <th>Locador</th>
+                <th>N° Expediente</th>
+                <th>Fecha Emisión</th>
+                <th>Responsable</th>
+                <th>Iniciales Emisor</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              @if (isLoading()) {
+                <tr>
+                  <td colspan="9" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando...</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              @for (cert of filteredCertificates(); track cert.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <span class="fw-semibold text-primary">
+                      {{ formatNumber(cert.certificate_number) }}-{{ cert.certificate_year }}
+                    </span>
+                  </td>
+                  <td class="fw-medium">
+                    {{ getLandlordName(cert.request?.landlord) }}
+                  </td>
+                  <td>{{ cert.request?.file_number ?? '—' }}</td>
+                  <td>{{ cert.issue_date ? cert.issue_date.substring(0, 10) : '—' }}</td>
+                  <td>{{ cert.responsible_name ?? '—' }}</td>
+                  <td>
+                    <span class="badge bg-info-subtle text-info">{{ cert.user_initials ?? '—' }}</span>
+                  </td>
+                  <td>
+                    @if (cert.status) {
+                      <span class="badge bg-success-subtle text-success text-uppercase">
+                        {{ cert.status.name }}
+                      </span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-info"
+                      (click)="openDetail(cert)"
+                      title="Ver detalle"
+                    >
+                      <i class="ri-eye-line"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+
+            </tbody>
+          </table>
+
+          @if (!isLoading() && filteredCertificates().length === 0) {
+            <div class="noresult">
+              <div class="text-center">
+                <h5 class="mt-2">No se encontraron constancias</h5>
+                <p class="text-muted mb-0">Aún no hay constancias generadas.</p>
+              </div>
+            </div>
+          }
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ========== Offcanvas Detalle ========== -->
+@if (selected()) {
+  <div class="offcanvas offcanvas-end show" tabindex="-1" style="width: 500px; visibility: visible;">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title">
+        <i class="ri-file-text-line me-2"></i>
+        Constancia {{ formatNumber(selected()!.certificate_number) }}-{{ selected()!.certificate_year }}
+      </h5>
+      <button type="button" class="btn-close" (click)="closeDetail()"></button>
+    </div>
+    <div class="offcanvas-body">
+
+      <!-- Datos generales -->
+      <div class="mb-4">
+        <h6 class="text-muted text-uppercase fw-semibold mb-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+          Datos Generales
+        </h6>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">N° Constancia</label>
+            <p class="fw-semibold mb-0 text-primary">
+              {{ formatNumber(selected()!.certificate_number) }}-{{ selected()!.certificate_year }}
+            </p>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Fecha de Emisión</label>
+            <p class="fw-semibold mb-0">{{ selected()!.issue_date ? selected()!.issue_date!.substring(0, 10) : '—' }}</p>
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Locador</label>
+            <p class="fw-semibold mb-0">{{ getLandlordName(selected()!.request?.landlord) }}</p>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">N° Expediente</label>
+            <p class="fw-semibold mb-0">{{ selected()!.request?.file_number ?? '—' }}</p>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Estado</label>
+            <p class="mb-0">
+              <span class="badge bg-success-subtle text-success text-uppercase">
+                {{ selected()!.status?.name ?? '—' }}
+              </span>
+            </p>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Funcionario Responsable</label>
+            <p class="fw-semibold mb-0">{{ selected()!.responsible_name ?? '—' }}</p>
+          </div>
+          <div class="col-3">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Iniciales Resp.</label>
+            <p class="mb-0">
+              <span class="badge bg-secondary-subtle text-secondary">{{ selected()!.responsible_initials ?? '—' }}</span>
+            </p>
+          </div>
+          <div class="col-3">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Iniciales Emisor</label>
+            <p class="mb-0">
+              <span class="badge bg-info-subtle text-info">{{ selected()!.user_initials ?? '—' }}</span>
+            </p>
+          </div>
+          @if (selected()!.motto_of_the_year) {
+            <div class="col-12">
+              <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Lema del Año</label>
+              <p class="fw-semibold mb-0" style="font-size: 0.875rem;">{{ selected()!.motto_of_the_year }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- Servicios incluidos -->
+      <div>
+        <h6 class="text-muted text-uppercase fw-semibold mb-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+          Servicios Incluidos ({{ selected()!.details?.length ?? 0 }})
+        </h6>
+
+        @if (!selected()!.details || selected()!.details!.length === 0) {
+          <p class="text-muted text-center py-3">Sin servicios registrados.</p>
+        }
+
+        @for (detail of selected()!.details; track detail.id; let i = $index) {
+          <div class="border rounded p-3 mb-2" style="font-size: 0.875rem;">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <span class="fw-semibold text-dark" style="max-width: 80%; white-space: normal;">
+                {{ detail.description_landlord_service }}
+              </span>
+              @if (detail.area) {
+                <span class="badge bg-info-subtle text-info ms-2 flex-shrink-0">{{ detail.area.acronym }}</span>
+              }
+            </div>
+            <div class="row g-1 text-muted mt-1">
+              @if (detail.order_number) {
+                <div class="col-6">
+                  <small>N° Orden: <span class="text-dark">{{ detail.order_number }}</span></small>
+                </div>
+              }
+              @if (detail.siaf_file_number) {
+                <div class="col-6">
+                  <small>Exp. SIAF: <span class="text-dark">{{ detail.siaf_file_number }}</span></small>
+                </div>
+              }
+              @if (detail.start_date) {
+                <div class="col-6">
+                  <small>Inicio: <span class="text-dark">{{ detail.start_date.substring(0, 10) }}</span></small>
+                </div>
+              }
+              @if (detail.end_date) {
+                <div class="col-6">
+                  <small>Fin: <span class="text-dark">{{ detail.end_date.substring(0, 10) }}</span></small>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+  <!-- backdrop -->
+  <div class="offcanvas-backdrop fade show" (click)="closeDetail()"></div>
+}

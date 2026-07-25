@@ -36,6 +36,22 @@ export const routes: Routes = [
             {
                 path: 'landlords',
                 loadComponent: () => import('./features/landlords/landlords-list/landlords-list').then(c => c.LandlordsListComponent)
+            },
+            {
+                path: 'landlord-service',
+                loadComponent: () => import('./features/landlord-service/landlord-service-list/landlord-service-list').then(c => c.LandlordServiceListComponent)
+            },
+            {
+                path: 'request-certificates',
+                loadComponent: () => import('./features/request-certificates/request-certificates-list/request-certificates-list').then(c => c.RequestCertificatesListComponent)
+            },
+            {
+                path: 'certificates',
+                loadComponent: () => import('./features/certificates/certificates-list/certificates-list').then(c => c.CertificatesListComponent)
+            },
+            {
+                path: 'certificates/generate/:requestId',
+                loadComponent: () => import('./features/certificates/generate-certificate/generate-certificate').then(c => c.GenerateCertificateComponent)
             }
         ]
     },

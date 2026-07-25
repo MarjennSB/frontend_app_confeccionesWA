@@ -1,0 +1,201 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">Generar Constancia</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="javascript: void(0);">Certificados</a></li>
+          <li class="breadcrumb-item"><a href="javascript: void(0);" (click)="goBack()">Solicitudes</a></li>
+          <li class="breadcrumb-item active">Generar Constancia</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+@if (isLoading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+}
+
+@if (!isLoading()) {
+
+  @if (errorMsg()) {
+    <div class="alert alert-danger">{{ errorMsg() }}</div>
+  }
+
+  <!-- Datos de la solicitud -->
+  @if (request()) {
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header border-0">
+            <h5 class="card-title mb-0">
+              <i class="ri-file-info-line me-2"></i>Datos de la Solicitud
+            </h5>
+          </div>
+          <div class="card-body pt-0">
+            <div class="row g-3">
+              <div class="col-lg-4">
+                <label class="form-label text-muted mb-1">Locador</label>
+                <p class="fw-semibold mb-0">
+                  {{ request()!.landlord ? getLandlordName(request()!.landlord!) : '—' }}
+                </p>
+                <small class="text-muted">{{ request()!.landlord?.document_number }}</small>
+              </div>
+              <div class="col-lg-2">
+                <label class="form-label text-muted mb-1">N° Expediente</label>
+                <p class="fw-semibold mb-0">{{ request()!.file_number ?? '—' }}</p>
+              </div>
+              <div class="col-lg-2">
+                <label class="form-label text-muted mb-1">Fecha Expediente</label>
+                <p class="fw-semibold mb-0">
+                  {{ request()!.file_date ? request()!.file_date!.substring(0, 10) : '—' }}
+                </p>
+              </div>
+              <div class="col-lg-4">
+                <label class="form-label text-muted mb-1">Motivo</label>
+                <p class="fw-semibold mb-0">{{ request()!.reason_request ?? '—' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selección de servicios -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header border-0">
+            <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0 flex-grow-1">
+                <i class="ri-list-check-2 me-2"></i>Servicios a incluir en la Constancia
+              </h5>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="selectAll()">
+                  Seleccionar todos
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearAll()">
+                  Limpiar
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body pt-0">
+
+            @if (services().length === 0) {
+              <div class="text-center py-4 text-muted">
+                <i class="ri-inbox-line fs-2 d-block mb-2"></i>
+                El locador no tiene servicios activos registrados.
+              </div>
+            }
+
+            @if (services().length > 0) {
+              @for (group of groupedServices(); track group.year) {
+                <div class="mb-1">
+                  <!-- Cabecera del año -->
+                  <div class="d-flex align-items-center gap-2 py-2 px-1 mb-1" style="border-bottom: 2px solid #e9ecef;">
+                    <span class="badge bg-dark fs-6">{{ group.year === 0 ? 'Sin año' : group.year }}</span>
+                    <small class="text-muted">{{ group.services.length }} servicio(s)</small>
+                    <div class="ms-auto d-flex gap-2">
+                      <button type="button" class="btn btn-xs btn-outline-primary" style="font-size:0.75rem; padding: 2px 8px;"
+                        (click)="selectGroup(group.services)">
+                        Seleccionar año
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table align-middle table-nowrap mb-0">
+                      <thead class="table-light text-muted">
+                        <tr>
+                          <th style="width: 50px;"></th>
+                          <th>Descripción del Servicio</th>
+                          <th>N° Orden</th>
+                          <th>N° Exp. SIAF</th>
+                          <th>Fecha Inicio</th>
+                          <th>Fecha Fin</th>
+                          <th>Área</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (service of group.services; track service.id) {
+                          <tr
+                            style="cursor: pointer;"
+                            [class.table-primary]="isServiceSelected(service.id)"
+                            (click)="toggleService(service.id)"
+                          >
+                            <td>
+                              <div class="form-check">
+                                <input
+                                  class="form-check-input"
+                                  type="checkbox"
+                                  [checked]="isServiceSelected(service.id)"
+                                  (click)="$event.stopPropagation()"
+                                  (change)="toggleService(service.id)"
+                                >
+                              </div>
+                            </td>
+                            <td style="max-width: 300px; white-space: normal;">
+                              {{ service.service_description }}
+                            </td>
+                            <td>{{ service.order_number ?? '—' }}</td>
+                            <td>{{ service.siaf_file_number ?? '—' }}</td>
+                            <td>{{ service.start_date ? service.start_date.substring(0, 10) : '—' }}</td>
+                            <td>{{ service.end_date ? service.end_date.substring(0, 10) : '—' }}</td>
+                            <td>
+                              @if (service.area) {
+                                <span class="badge bg-info-subtle text-info">{{ service.area.acronym }}</span>
+                              } @else {
+                                <span class="text-muted">—</span>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+              <div class="mt-2 text-muted" style="font-size: 0.875em;">
+                {{ selectedServiceIds().size }} de {{ services().length }} servicio(s) seleccionado(s)
+              </div>
+            }
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="d-flex gap-2 justify-content-end mb-4">
+          <button type="button" class="btn btn-light" (click)="goBack()">
+            <i class="ri-arrow-left-line me-1"></i> Volver
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            [disabled]="isGenerating()"
+            (click)="generate()"
+          >
+            @if (isGenerating()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              Generando...
+            } @else {
+              <i class="ri-file-text-line me-1"></i> Generar Constancia
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+
+  }
+
+}
