@@ -5,6 +5,7 @@ import { LayoutComponent } from './shared/layout/layout';
 export const routes: Routes = [
     {
         path: '',
+        
         redirectTo: 'dashboard',
         pathMatch: 'full'
     },

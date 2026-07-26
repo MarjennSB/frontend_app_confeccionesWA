@@ -1,0 +1,42 @@
+@if (sessionExpired()) {
+  <!-- Backdrop -->
+  <div
+    class="modal-backdrop fade show"
+    style="z-index: 1055;"
+  ></div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    style="z-index: 1056;"
+    aria-modal="true"
+    role="dialog"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-warning-subtle border-0 pb-0">
+          <div class="w-100 text-center pt-2">
+            <i class="ri-time-line text-warning" style="font-size: 3rem;"></i>
+          </div>
+        </div>
+        <div class="modal-body text-center px-4 pb-2">
+          <h5 class="mt-2 mb-2">Sesión expirada</h5>
+          <p class="text-muted mb-0">
+            Tu sesión ha expirado por inactividad.<br>
+            Por favor inicia sesión nuevamente para continuar.
+          </p>
+        </div>
+        <div class="modal-footer border-0 justify-content-center pb-4">
+          <button
+            type="button"
+            class="btn btn-primary px-5"
+            (click)="goToLogin()"
+          >
+            <i class="ri-login-box-line me-2"></i>Ir al Login
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
