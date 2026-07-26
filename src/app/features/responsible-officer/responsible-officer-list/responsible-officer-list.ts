@@ -30,6 +30,7 @@ export class ResponsibleOfficerListComponent implements OnInit {
     document_number: ['', [Validators.required, Validators.maxLength(20)]],
     name: ['', [Validators.required, Validators.maxLength(200)]],
     initials: ['', [Validators.required, Validators.maxLength(20)]],
+    charge: ['', [Validators.maxLength(200)]],
     is_active: [true],
   });
 
@@ -76,7 +77,7 @@ export class ResponsibleOfficerListComponent implements OnInit {
   openCreateModal(): void {
     this.isEditing.set(false);
     this.editingId.set(null);
-    this.officerForm.reset({ document_number: '', name: '', initials: '', is_active: true });
+    this.officerForm.reset({ document_number: '', name: '', initials: '', charge: '', is_active: true });
     this.errorMsg.set(null);
     this.getModal().show();
   }
@@ -88,6 +89,7 @@ export class ResponsibleOfficerListComponent implements OnInit {
       document_number: officer.document_number,
       name: officer.name,
       initials: officer.initials,
+      charge: officer.charge ?? '',
       is_active: officer.is_active,
     });
     this.errorMsg.set(null);
@@ -100,10 +102,10 @@ export class ResponsibleOfficerListComponent implements OnInit {
       return;
     }
 
-    const { document_number, name, initials, is_active } = this.officerForm.getRawValue();
+    const { document_number, name, initials, charge, is_active } = this.officerForm.getRawValue();
 
     if (this.isEditing()) {
-      this.officerService.update(this.editingId()!, { document_number, name, initials, is_active }).subscribe({
+      this.officerService.update(this.editingId()!, { document_number, name, initials, charge, is_active }).subscribe({
         next: () => {
           this.getModal().hide();
           this.showSuccess('Funcionario actualizado correctamente.');
@@ -114,7 +116,7 @@ export class ResponsibleOfficerListComponent implements OnInit {
         },
       });
     } else {
-      this.officerService.create({ document_number, name, initials, is_active }).subscribe({
+      this.officerService.create({ document_number, name, initials, charge, is_active }).subscribe({
         next: () => {
           this.getModal().hide();
           this.showSuccess('Funcionario creado correctamente.');
@@ -127,7 +129,7 @@ export class ResponsibleOfficerListComponent implements OnInit {
     }
   }
 
-  isFieldInvalid(field: 'document_number' | 'name' | 'initials'): boolean {
+  isFieldInvalid(field: 'document_number' | 'name' | 'initials' | 'charge'): boolean {
     const control = this.officerForm.controls[field];
     return control.invalid && control.touched;
   }

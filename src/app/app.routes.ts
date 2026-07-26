@@ -52,6 +52,10 @@ export const routes: Routes = [
             {
                 path: 'certificates/generate/:requestId',
                 loadComponent: () => import('./features/certificates/generate-certificate/generate-certificate').then(c => c.GenerateCertificateComponent)
+            },
+            {
+                path: 'users',
+                loadComponent: () => import('./features/users/users-list/users-list').then(c => c.UsersListComponent)
             }
         ]
     },

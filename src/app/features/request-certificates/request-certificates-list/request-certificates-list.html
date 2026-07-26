@@ -205,7 +205,7 @@
                 id="file-number-field"
                 class="form-control"
                 [class.is-invalid]="isFieldInvalid('file_number')"
-                placeholder="Solo números, ej: 12345"
+                placeholder="ej: 12345"
                 maxlength="100"
                 inputmode="numeric"
                 (keypress)="$any($event).charCode >= 48 && $any($event).charCode <= 57 || $any($event).preventDefault()"
