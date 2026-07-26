@@ -134,6 +134,25 @@ export class CertificatesListComponent implements OnInit {
     return num.padStart(4, '0');
   }
 
+  exportExcel(): void {
+    const filters = {
+      search: this.searchTerm() || undefined,
+      dateFrom: this.dateFrom() || undefined,
+      dateTo: this.dateTo() || undefined,
+    };
+    this.certificatesService.exportExcel(filters).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `constancias-${new Date().toISOString().substring(0, 10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.errorMsg.set('Error al exportar el Excel.'),
+    });
+  }
+
   downloadWord(cert: Certificate): void {
     this.certificatesService.downloadWord(cert.id).subscribe({
       next: (blob) => {

@@ -42,6 +42,14 @@ export class CertificatesService {
     return this.http.get<Certificate>(`${this.baseUrl}/${id}`);
   }
 
+  exportExcel(filters?: Pick<CertificateFilters, 'search' | 'dateFrom' | 'dateTo'>): Observable<Blob> {
+    let params = new HttpParams();
+    if (filters?.search) params = params.set('search', filters.search);
+    if (filters?.dateFrom) params = params.set('dateFrom', filters.dateFrom);
+    if (filters?.dateTo) params = params.set('dateTo', filters.dateTo);
+    return this.http.get(`${this.baseUrl}/export`, { params, responseType: 'blob' });
+  }
+
   downloadWord(id: string): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/${id}/download`, { responseType: 'blob' });
   }
