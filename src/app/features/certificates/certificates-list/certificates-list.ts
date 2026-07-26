@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CertificatesService } from '../../../core/services/certificates.service';
 import { Certificate } from '../../../core/models/certificate.model';
 import { Landlord } from '../../../core/models/landlord.model';
@@ -6,31 +7,46 @@ import { Landlord } from '../../../core/models/landlord.model';
 @Component({
   selector: 'app-certificates-list',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './certificates-list.html',
 })
 export class CertificatesListComponent implements OnInit {
   private readonly certificatesService = inject(CertificatesService);
 
   certificates = signal<Certificate[]>([]);
-  filteredCertificates = signal<Certificate[]>([]);
   isLoading = signal(false);
   errorMsg = signal<string | null>(null);
   searchTerm = signal('');
+  dateFrom = signal('');
+  dateTo = signal('');
 
-  // Detalle seleccionado
+  page = signal(1);
+  limit = signal(10);
+  total = signal(0);
+
+  totalPages = computed(() => Math.ceil(this.total() / this.limit()) || 1);
+  pages = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
+
   selected = signal<Certificate | null>(null);
 
   ngOnInit(): void {
-    this.loadCertificates();
+    this.fetch();
   }
 
-  loadCertificates(): void {
+  fetch(): void {
     this.isLoading.set(true);
-    this.certificatesService.getAll().subscribe({
-      next: (data) => {
-        this.certificates.set(data);
-        this.applyFilter();
+    this.errorMsg.set(null);
+    const filters = {
+      search: this.searchTerm() || undefined,
+      dateFrom: this.dateFrom() || undefined,
+      dateTo: this.dateTo() || undefined,
+      page: this.page(),
+      limit: this.limit(),
+    };
+    this.certificatesService.getAll(filters).subscribe({
+      next: (res) => {
+        this.certificates.set(res.data);
+        this.total.set(res.total);
         this.isLoading.set(false);
       },
       error: () => {
@@ -40,28 +56,45 @@ export class CertificatesListComponent implements OnInit {
     });
   }
 
-  applyFilter(): void {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) {
-      this.filteredCertificates.set(this.certificates());
-      return;
-    }
-    this.filteredCertificates.set(
-      this.certificates().filter(
-        (c) =>
-          (c.certificate_number ?? '').toLowerCase().includes(term) ||
-          String(c.certificate_year ?? '').includes(term) ||
-          (c.responsible_name ?? '').toLowerCase().includes(term) ||
-          (c.user_initials ?? '').toLowerCase().includes(term) ||
-          (c.request ? this.getLandlordName(c.request.landlord) : '').toLowerCase().includes(term) ||
-          (c.request?.file_number ?? '').toLowerCase().includes(term)
-      )
-    );
-  }
-
   onSearch(value: string): void {
     this.searchTerm.set(value);
-    this.applyFilter();
+  }
+
+  onSearchEnter(): void {
+    this.page.set(1);
+    this.fetch();
+  }
+
+  onDateFromChange(value: string): void {
+    this.dateFrom.set(value);
+  }
+
+  onDateToChange(value: string): void {
+    this.dateTo.set(value);
+  }
+
+  clearFilters(): void {
+    this.searchTerm.set('');
+    this.dateFrom.set('');
+    this.dateTo.set('');
+    this.page.set(1);
+    this.fetch();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!this.searchTerm() || !!this.dateFrom() || !!this.dateTo();
+  }
+
+  goToPage(p: number): void {
+    if (p < 1 || p > this.totalPages()) return;
+    this.page.set(p);
+    this.fetch();
+  }
+
+  onLimitChange(value: string): void {
+    this.limit.set(Number(value));
+    this.page.set(1);
+    this.fetch();
   }
 
   openDetail(cert: Certificate): void {
@@ -79,6 +112,21 @@ export class CertificatesListComponent implements OnInit {
     return [landlord.first_name, landlord.last_name, landlord.last_name_mother]
       .filter(v => !!v)
       .join(' ') || landlord.document_number;
+  }
+
+  getLandlordDocument(landlord?: Landlord): string {
+    if (!landlord) return '—';
+    const acronym = landlord.type_document?.acronym ?? '';
+    const num = landlord.document_number ?? '';
+    return acronym ? `${acronym} - ${num}` : num || '—';
+  }
+
+  getFileNumber(cert: Certificate): string {
+    const num = cert.request?.file_number;
+    const date = cert.request?.file_date;
+    if (!num) return '—';
+    const year = date ? new Date(date).getFullYear() : null;
+    return year ? `${num}-${year}` : num;
   }
 
   formatNumber(num?: string): string {

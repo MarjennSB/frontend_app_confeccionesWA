@@ -26,31 +26,63 @@
 
       <div class="card-body border border-dashed border-end-0 border-start-0">
         <form>
-          <div class="row g-3">
-            <div class="col-xxl-5 col-sm-12">
-              <div class="search-box">
-                <input
-                  type="text"
-                  class="form-control search bg-light border-light"
-                  placeholder="Buscar por N° constancia, locador, expediente, responsable..."
-                  [value]="searchTerm()"
-                  (input)="onSearch($any($event.target).value)"
-                >
-                <i class="ri-search-line search-icon"></i>
+          <div class="row g-3 align-items-end">
+            <div class="col-xxl-4 col-md-5 col-sm-12">
+              <div class="d-flex gap-2">
+                <div class="search-box flex-grow-1">
+                  <input
+                    type="text"
+                    class="form-control search bg-light border-light"
+                    placeholder="Buscar por N° constancia, locador, expediente, responsable..."
+                    [value]="searchTerm()"
+                    (input)="onSearch($any($event.target).value)"
+                    (keydown.enter)="onSearchEnter()"
+                  >
+                  <i class="ri-search-line search-icon"></i>
+                </div>
+                <button type="button" class="btn btn-primary" (click)="onSearchEnter()" title="Buscar">
+                  <i class="ri-search-line"></i>
+                </button>
               </div>
             </div>
+            <div class="col-xxl-2 col-md-3 col-sm-6">
+              <label class="form-label mb-1 text-muted" style="font-size: 0.8rem;">Fecha emisión desde</label>
+              <input
+                type="date"
+                class="form-control bg-light border-light"
+                [value]="dateFrom()"
+                (change)="onDateFromChange($any($event.target).value)"
+              >
+            </div>
+            <div class="col-xxl-2 col-md-3 col-sm-6">
+              <label class="form-label mb-1 text-muted" style="font-size: 0.8rem;">Fecha emisión hasta</label>
+              <input
+                type="date"
+                class="form-control bg-light border-light"
+                [value]="dateTo()"
+                (change)="onDateToChange($any($event.target).value)"
+              >
+            </div>
+            @if (hasActiveFilters()) {
+              <div class="col-auto">
+                <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()" title="Limpiar filtros">
+                  <i class="ri-filter-off-line me-1"></i> Limpiar
+                </button>
+              </div>
+            }
           </div>
         </form>
       </div>
 
       <div class="card-body">
-        <div class="table-responsive table-card mb-4">
+        <div class="table-responsive table-card mb-0">
           <table class="table align-middle table-nowrap mb-0">
             <thead class="table-light text-muted">
               <tr>
                 <th style="width: 50px;">#</th>
                 <th>N° Constancia</th>
                 <th>Locador</th>
+                <th>Documento</th>
                 <th>N° Expediente</th>
                 <th>Fecha Emisión</th>
                 <th>Responsable</th>
@@ -63,7 +95,7 @@
 
               @if (isLoading()) {
                 <tr>
-                  <td colspan="9" class="text-center py-4">
+                  <td colspan="10" class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
                       <span class="visually-hidden">Cargando...</span>
                     </div>
@@ -71,7 +103,7 @@
                 </tr>
               }
 
-              @for (cert of filteredCertificates(); track cert.id; let i = $index) {
+              @for (cert of certificates(); track cert.id; let i = $index) {
                 <tr>
                   <td>{{ i + 1 }}</td>
                   <td>
@@ -82,7 +114,10 @@
                   <td class="fw-medium">
                     {{ getLandlordName(cert.request?.landlord) }}
                   </td>
-                  <td>{{ cert.request?.file_number ?? '—' }}</td>
+                  <td>
+                    <span class="text-muted" style="font-size: 0.85rem;">{{ getLandlordDocument(cert.request?.landlord) }}</span>
+                  </td>
+                  <td>{{ getFileNumber(cert) }}</td>
                   <td>{{ cert.issue_date ? cert.issue_date.substring(0, 10) : '—' }}</td>
                   <td>{{ cert.responsible_name ?? '—' }}</td>
                   <td>
@@ -123,7 +158,7 @@
             </tbody>
           </table>
 
-          @if (!isLoading() && filteredCertificates().length === 0) {
+          @if (!isLoading() && certificates().length === 0) {
             <div class="noresult">
               <div class="text-center">
                 <h5 class="mt-2">No se encontraron constancias</h5>
@@ -133,6 +168,48 @@
           }
 
         </div>
+
+        <!-- Paginación -->
+        <div class="d-flex align-items-center justify-content-between px-3 py-3 border-top flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-muted" style="font-size: 0.85rem;">Filas por página:</span>
+            <select class="form-select form-select-sm" style="width: auto;" [value]="limit()" (change)="onLimitChange($any($event.target).value)">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            <span class="text-muted" style="font-size: 0.85rem;">
+              {{ (page() - 1) * limit() + 1 }}–{{ page() * limit() > total() ? total() : page() * limit() }}
+              de {{ total() }}
+            </span>
+          </div>
+
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="page() === 1">
+                <button class="page-link" (click)="goToPage(page() - 1)" [disabled]="page() === 1">
+                  <i class="ri-arrow-left-s-line"></i>
+                </button>
+              </li>
+              @for (p of pages(); track p) {
+                @if (pages().length <= 7 || p === 1 || p === totalPages() || (p >= page() - 2 && p <= page() + 2)) {
+                  <li class="page-item" [class.active]="p === page()">
+                    <button class="page-link" (click)="goToPage(p)">{{ p }}</button>
+                  </li>
+                } @else if (p === page() - 3 || p === page() + 3) {
+                  <li class="page-item disabled"><span class="page-link">…</span></li>
+                }
+              }
+              <li class="page-item" [class.disabled]="page() === totalPages()">
+                <button class="page-link" (click)="goToPage(page() + 1)" [disabled]="page() === totalPages()">
+                  <i class="ri-arrow-right-s-line"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
       </div>
 
     </div>
@@ -167,13 +244,17 @@
             <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Fecha de Emisión</label>
             <p class="fw-semibold mb-0">{{ selected()!.issue_date ? selected()!.issue_date!.substring(0, 10) : '—' }}</p>
           </div>
-          <div class="col-12">
+          <div class="col-8">
             <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Locador</label>
             <p class="fw-semibold mb-0">{{ getLandlordName(selected()!.request?.landlord) }}</p>
           </div>
+          <div class="col-4">
+            <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Documento</label>
+            <p class="fw-semibold mb-0">{{ getLandlordDocument(selected()!.request?.landlord) }}</p>
+          </div>
           <div class="col-6">
             <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">N° Expediente</label>
-            <p class="fw-semibold mb-0">{{ selected()!.request?.file_number ?? '—' }}</p>
+            <p class="fw-semibold mb-0">{{ getFileNumber(selected()!) }}</p>
           </div>
           <div class="col-6">
             <label class="form-label text-muted mb-1" style="font-size: 0.8rem;">Estado</label>
