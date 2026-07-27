@@ -25,52 +25,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/dashboard/dashboard').then(c => c.DashboardComponent)
             },
             {
-                path: 'areas',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador'] },
-                loadComponent: () => import('./features/areas/areas-list/areas-list').then(c => c.AreasListComponent)
+                path: 'scan-monitor',
+                loadComponent: () => import('./features/scan-monitor/scan-monitor').then(c => c.ScanMonitorComponent)
             },
             {
-                path: 'responsible-officer',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador'] },
-                loadComponent: () => import('./features/responsible-officer/responsible-officer-list/responsible-officer-list').then(c => c.ResponsibleOfficerListComponent)
+                path: 'networks',
+                loadComponent: () => import('./features/networks/networks').then(c => c.Networks)
             },
             {
-                path: 'parameters',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador'] },
-                loadComponent: () => import('./features/parameters/parameters-list/parameters-list').then(c => c.ParametersListComponent)
-            },
-            {
-                path: 'landlords',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador', 'Operador'] },
-                loadComponent: () => import('./features/landlords/landlords-list/landlords-list').then(c => c.LandlordsListComponent)
-            },
-            {
-                path: 'landlord-service',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador', 'Operador'] },
-                loadComponent: () => import('./features/landlord-service/landlord-service-list/landlord-service-list').then(c => c.LandlordServiceListComponent)
-            },
-            {
-                path: 'request-certificates',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador', 'Operador'] },
-                loadComponent: () => import('./features/request-certificates/request-certificates-list/request-certificates-list').then(c => c.RequestCertificatesListComponent)
-            },
-            {
-                path: 'certificates',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador', 'Operador'] },
-                loadComponent: () => import('./features/certificates/certificates-list/certificates-list').then(c => c.CertificatesListComponent)
-            },
-            {
-                path: 'certificates/generate/:requestId',
-                canActivate: [rolesGuard],
-                data: { roles: ['Administrador', 'Coordinador', 'Operador'] },
-                loadComponent: () => import('./features/certificates/generate-certificate/generate-certificate').then(c => c.GenerateCertificateComponent)
+                path: 'devices',
+                loadComponent: () => import('./features/devices/devices').then(c => c.Devices)
             },
             {
                 path: 'users',

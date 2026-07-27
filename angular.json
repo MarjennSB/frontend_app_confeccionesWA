@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "frontend-certificates": {
+    "MvpMonitoreo_frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",

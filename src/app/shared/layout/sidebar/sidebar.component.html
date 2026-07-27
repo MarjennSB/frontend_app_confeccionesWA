@@ -28,68 +28,45 @@
     <div class="container-fluid">
       <ul class="navbar-nav" id="navbar-nav">
 
-
-        <!-- CATÁLOGOS: Administrador y Coordinador -->
-        @if (tokenService.hasRole('Administrador', 'Coordinador')) {
-          <li class="menu-title"><span>Catálogos</span></li>
-
-          <li class="nav-item">
-            <a routerLink="/areas" routerLinkActive="active" class="nav-link menu-link">
-              <i class="ri-building-2-line"></i>
-              <span>Áreas</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a routerLink="/responsible-officer" routerLinkActive="active" class="nav-link menu-link">
-              <i class="ri-user-star-line"></i>
-              <span>Funcionarios</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a routerLink="/parameters" routerLinkActive="active" class="nav-link menu-link">
-              <i class="ri-settings-3-line"></i>
-              <span>Parámetros</span>
-            </a>
-          </li>
-        }
-
-        <!-- LOCADORES: todos los roles -->
-        <li class="menu-title"><span>Locadores</span></li>
+        <li class="menu-title"><span>Monitoreo</span></li>
 
         <li class="nav-item">
-          <a routerLink="/landlords" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-user-line"></i>
-            <span>Locadores</span>
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-dashboard-2-line"></i>
+            <span>Dashboard</span>
           </a>
         </li>
 
         <li class="nav-item">
-          <a routerLink="/landlord-service" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-file-list-3-line"></i>
-            <span>Servicios</span>
+          <a class="nav-link menu-link" href="#sidebarMantenimiento" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarMantenimiento">
+            <i class="ri-settings-4-line"></i>
+            <span>Mantenimiento</span>
           </a>
+          <div class="collapse menu-dropdown" id="sidebarMantenimiento">
+            <ul class="nav nav-sm flex-column">
+              <li class="nav-item">
+                <a routerLink="/networks" routerLinkActive="active" class="nav-link menu-link">
+                  Redes
+                </a>
+              </li>
+            </ul>
+          </div>
         </li>
-
-        <!-- CONSTANCIAS: todos los roles -->
-        <li class="menu-title"><span>Constancias</span></li>
 
         <li class="nav-item">
-          <a routerLink="/request-certificates" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-file-add-line"></i>
-            <span>Solicitudes</span>
+          <a routerLink="/devices" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-computer-line"></i>
+            <span>Dispositivos</span>
           </a>
         </li>
 
         <li class="nav-item">
-          <a routerLink="/certificates" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-award-line"></i>
-            <span>Constancias</span>
+          <a routerLink="/scan-monitor" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-radar-line"></i>
+            <span>Escaneos</span>
           </a>
         </li>
 
-        
         <!-- ADMINISTRACIÓN: solo Administrador -->
         @if (tokenService.hasRole('Administrador')) {
           <li class="menu-title"><span>Administración</span></li>

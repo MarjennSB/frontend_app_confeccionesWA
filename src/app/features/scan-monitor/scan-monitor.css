@@ -1,0 +1,70 @@
+.subnet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+  gap: 8px;
+  padding: 10px;
+}
+
+.ip-box {
+  background: var(--vz-light, #f3f6f9);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vz-body-color, #212529);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid var(--vz-border-color, #e9ebec);
+}
+
+.ip-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  filter: brightness(0.95);
+}
+
+.status-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vz-secondary, #878a99);
+}
+
+/* Status Colors */
+.ip-box.alive {
+  background: rgba(10, 179, 156, 0.18);
+  border-color: rgba(10, 179, 156, 0.6);
+  color: var(--vz-success, #0ab39c);
+  font-weight: 700;
+}
+.ip-box.alive .status-dot {
+  background: var(--vz-success, #0ab39c);
+  box-shadow: 0 0 5px var(--vz-success, #0ab39c);
+}
+
+.ip-box.down {
+  background: rgba(240, 101, 72, 0.18);
+  border-color: rgba(240, 101, 72, 0.6);
+  color: var(--vz-danger, #f06548);
+  font-weight: 700;
+}
+.ip-box.down .status-dot {
+  background: var(--vz-danger, #f06548);
+  box-shadow: 0 0 5px var(--vz-danger, #f06548);
+}
+
+/* Animations during scan */
+@keyframes pulseGlow {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.1); }
+  100% { filter: brightness(1); }
+}
+
+.scanning .ip-box {
+  animation: pulseGlow 1.5s infinite;
+}

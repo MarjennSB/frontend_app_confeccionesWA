@@ -26,7 +26,7 @@
   <div class="row">
 
     <!-- Tarjeta de información -->
-    <div class="col-xxl-3 col-lg-4">
+    <!-- <div class="col-xxl-3 col-lg-4">
       <div class="card">
         <div class="card-body text-center p-4">
           <div class="avatar-lg mx-auto mb-3">
@@ -52,9 +52,9 @@
         </div>
       </div>
     </div>
-
+ -->
     <!-- Cambio de contraseña -->
-    <div class="col-xxl-9 col-lg-8">
+    <div class="col-12">
       <div class="card">
         <div class="card-header border-0">
           <h5 class="card-title mb-0">
@@ -79,7 +79,7 @@
 
           <form (ngSubmit)="onChangePassword()" #pwForm="ngForm">
             <div class="row g-3">
-              <div class="col-md-6 col-12">
+              <div class="col-lg-4 col-12">
                 <label class="form-label">Contraseña actual <span class="text-danger">*</span></label>
                 <input
                   type="password"
@@ -90,10 +90,7 @@
                   required
                 >
               </div>
-              <div class="col-md-6 col-12">
-                <!-- espacio para alinear en pantallas grandes -->
-              </div>
-              <div class="col-md-6 col-12">
+              <div class="col-lg-4 col-12">
                 <label class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
                 <input
                   type="password"
@@ -104,7 +101,7 @@
                   required
                 >
               </div>
-              <div class="col-md-6 col-12">
+              <div class="col-lg-4 col-12">
                 <label class="form-label">Confirmar nueva contraseña <span class="text-danger">*</span></label>
                 <input
                   type="password"
@@ -136,7 +133,7 @@
       </div>
 
       <!-- Información adicional -->
-      <div class="card">
+      <!-- <div class="card">
         <div class="card-header border-0">
           <h5 class="card-title mb-0">
             <i class="ri-information-line me-2"></i>Información de la cuenta
@@ -176,7 +173,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
     </div>
   </div>

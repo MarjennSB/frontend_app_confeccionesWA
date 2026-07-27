@@ -12,7 +12,10 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
         tokenService.removeToken();
-        sessionService.triggerExpired();
+        // Solo mostramos el modal de "Sesion Expirada" si no estamos intentando loguearnos
+        if (!req.url.includes('/auth/login')) {
+          sessionService.triggerExpired();
+        }
       }
       return throwError(() => error);
     })

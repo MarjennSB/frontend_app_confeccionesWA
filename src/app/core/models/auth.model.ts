@@ -1,18 +1,21 @@
-export interface LoginRequestDto {
-    email: string;
-    password: string;
+export interface CurrentUser {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  roles: string[];
+  role_id?: number;
 }
 
-export interface CurrentUser {
-    id: string;
-    email: string;
-    username: string;
-    first_name?: string;
-    last_name?: string;
-    roles: string[];
+export interface LoginRequestDto {
+  email?: string;
+  password?: string;
+  username?: string;
 }
 
 export interface LoginResponseDto {
-    access_token: string;
-    user: CurrentUser;
+  access_token: string;
+  token_type: string;
+  user: CurrentUser;
 }

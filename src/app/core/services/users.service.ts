@@ -7,8 +7,8 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/users`;
-  private readonly rolesUrl = `${environment.apiUrl}/roles`;
+  private readonly baseUrl = `${environment.apiUrl}/auth/users`;
+  private readonly rolesUrl = `${environment.apiUrl}/auth/roles`;
 
   getAll(): Observable<User[]> {
     return this.http.get<User[]>(`${this.baseUrl}/all`);
@@ -19,7 +19,7 @@ export class UsersService {
   }
 
   create(dto: CreateUserDto): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}/register`, dto);
+    return this.http.post<User>(`${environment.apiUrl}/auth/register`, dto);
   }
 
   update(id: string, dto: UpdateUserDto): Observable<User> {
