@@ -3,7 +3,7 @@
   <div class="navbar-brand-box">
     <a routerLink="/" class="logo logo-dark">
       <span class="logo-sm">
-        <img src="assets/images/logo-sm.png" alt="" height="22">
+        <img src="assets/images/logo.png" alt="" height="22">
       </span>
       <span class="logo-lg">
         <img src="assets/images/logo-dark.png" alt="" height="17">
@@ -11,10 +11,10 @@
     </a>
     <a routerLink="/" class="logo logo-light">
       <span class="logo-sm">
-        <img src="assets/images/logo-sm.png" alt="" height="22">
+        <img src="assets/images/logo.png" alt="" height="60">
       </span>
       <span class="logo-lg">
-        <img src="assets/images/logo-light.png" alt="" height="17">
+        <img src="assets/images/logo.png" alt="" height="100">
       </span>
     </a>
     <button type="button"
@@ -28,17 +28,6 @@
     <div class="container-fluid">
       <ul class="navbar-nav" id="navbar-nav">
 
-        <!-- ADMINISTRACIÓN: solo Administrador -->
-        @if (tokenService.hasRole('Administrador')) {
-          <li class="menu-title"><span>Administración</span></li>
-
-          <li class="nav-item">
-            <a routerLink="/users" routerLinkActive="active" class="nav-link menu-link">
-              <i class="ri-group-line"></i>
-              <span>Usuarios</span>
-            </a>
-          </li>
-        }
 
         <!-- CATÁLOGOS: Administrador y Coordinador -->
         @if (tokenService.hasRole('Administrador', 'Coordinador')) {
@@ -100,6 +89,18 @@
           </a>
         </li>
 
+        
+        <!-- ADMINISTRACIÓN: solo Administrador -->
+        @if (tokenService.hasRole('Administrador')) {
+          <li class="menu-title"><span>Administración</span></li>
+
+          <li class="nav-item">
+            <a routerLink="/users" routerLinkActive="active" class="nav-link menu-link">
+              <i class="ri-group-line"></i>
+              <span>Usuarios</span>
+            </a>
+          </li>
+        }
       </ul>
     </div>
   </div>
