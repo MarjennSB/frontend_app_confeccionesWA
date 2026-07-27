@@ -14,6 +14,11 @@ export class TokenService {
 
   readonly isAuthenticated = computed(() => !!this._token());
   readonly currentUser = computed(() => this._user());
+  readonly userRoles = computed(() => this._user()?.roles ?? []);
+
+  hasRole(...roles: string[]): boolean {
+    return roles.some(r => this.userRoles().includes(r));
+  }
 
   saveToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);

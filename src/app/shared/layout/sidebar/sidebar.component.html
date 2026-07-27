@@ -28,38 +28,45 @@
     <div class="container-fluid">
       <ul class="navbar-nav" id="navbar-nav">
 
-        <li class="menu-title"><span>Administración</span></li>
+        <!-- ADMINISTRACIÓN: solo Administrador -->
+        @if (tokenService.hasRole('Administrador')) {
+          <li class="menu-title"><span>Administración</span></li>
 
-        <li class="nav-item">
-          <a routerLink="/users" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-group-line"></i>
-            <span>Usuarios</span>
-          </a>
-        </li>
+          <li class="nav-item">
+            <a routerLink="/users" routerLinkActive="active" class="nav-link menu-link">
+              <i class="ri-group-line"></i>
+              <span>Usuarios</span>
+            </a>
+          </li>
+        }
 
-        <li class="menu-title"><span>Catálogos</span></li>
+        <!-- CATÁLOGOS: Administrador y Coordinador -->
+        @if (tokenService.hasRole('Administrador', 'Coordinador')) {
+          <li class="menu-title"><span>Catálogos</span></li>
 
-        <li class="nav-item">
-          <a routerLink="/areas" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-building-2-line"></i>
-            <span>Áreas</span>
-          </a>
-        </li>
+          <li class="nav-item">
+            <a routerLink="/areas" routerLinkActive="active" class="nav-link menu-link">
+              <i class="ri-building-2-line"></i>
+              <span>Áreas</span>
+            </a>
+          </li>
 
-        <li class="nav-item">
-          <a routerLink="/responsible-officer" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-user-star-line"></i>
-            <span>Funcionarios</span>
-          </a>
-        </li>
+          <li class="nav-item">
+            <a routerLink="/responsible-officer" routerLinkActive="active" class="nav-link menu-link">
+              <i class="ri-user-star-line"></i>
+              <span>Funcionarios</span>
+            </a>
+          </li>
 
-        <li class="nav-item">
-          <a routerLink="/parameters" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-settings-3-line"></i>
-            <span>Parámetros</span>
-          </a>
-        </li>
+          <li class="nav-item">
+            <a routerLink="/parameters" routerLinkActive="active" class="nav-link menu-link">
+              <i class="ri-settings-3-line"></i>
+              <span>Parámetros</span>
+            </a>
+          </li>
+        }
 
+        <!-- LOCADORES: todos los roles -->
         <li class="menu-title"><span>Locadores</span></li>
 
         <li class="nav-item">
@@ -76,6 +83,7 @@
           </a>
         </li>
 
+        <!-- CONSTANCIAS: todos los roles -->
         <li class="menu-title"><span>Constancias</span></li>
 
         <li class="nav-item">
