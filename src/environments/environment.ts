@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'http://localhost:3001'
+    apiUrl: 'https://backend-certificates-0dlz.onrender.com'
 };
