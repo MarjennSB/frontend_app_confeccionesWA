@@ -58,6 +58,10 @@ export const routes: Routes = [
             {
                 path: 'users',
                 loadComponent: () => import('./features/users/users-list/users-list').then(c => c.UsersListComponent)
+            },
+            {
+                path: 'profile',
+                loadComponent: () => import('./features/profile/profile').then(c => c.ProfileComponent)
             }
         ]
     },

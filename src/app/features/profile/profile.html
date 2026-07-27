@@ -1,0 +1,183 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">Mi Perfil</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="javascript: void(0);">Cuenta</a></li>
+          <li class="breadcrumb-item active">Mi Perfil</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+@if (isLoading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+}
+
+@if (!isLoading() && profile()) {
+  <div class="row">
+
+    <!-- Tarjeta de información -->
+    <div class="col-xxl-3 col-lg-4">
+      <div class="card">
+        <div class="card-body text-center p-4">
+          <div class="avatar-lg mx-auto mb-3">
+            <div class="avatar-title rounded-circle bg-primary fs-24 fw-bold text-white" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem !important; border-radius: 50%;">
+              {{ getInitials() }}
+            </div>
+          </div>
+          <h5 class="mb-1">{{ getFullName() }}</h5>
+          <p class="text-muted mb-2" style="font-size: 0.875rem;">{{ profile()!.email }}</p>
+          <div class="d-flex justify-content-center gap-2 flex-wrap">
+            @for (role of profile()!.roles; track role) {
+              <span class="badge bg-primary-subtle text-primary">{{ role }}</span>
+            }
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-top p-3">
+          <div class="row g-2 text-center">
+            <div class="col-12">
+              <p class="text-muted mb-1" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Usuario</p>
+              <p class="fw-semibold mb-0" style="font-size: 0.9rem;">{{ profile()!.username }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cambio de contraseña -->
+    <div class="col-xxl-9 col-lg-8">
+      <div class="card">
+        <div class="card-header border-0">
+          <h5 class="card-title mb-0">
+            <i class="ri-lock-password-line me-2"></i>Cambiar Contraseña
+          </h5>
+        </div>
+        <div class="card-body">
+
+          @if (successMsg()) {
+            <div class="alert alert-success alert-dismissible" role="alert">
+              <i class="ri-checkbox-circle-line me-2"></i>{{ successMsg() }}
+              <button type="button" class="btn-close" (click)="successMsg.set(null)"></button>
+            </div>
+          }
+
+          @if (errorMsg()) {
+            <div class="alert alert-danger alert-dismissible" role="alert">
+              <i class="ri-error-warning-line me-2"></i>{{ errorMsg() }}
+              <button type="button" class="btn-close" (click)="errorMsg.set(null)"></button>
+            </div>
+          }
+
+          <form (ngSubmit)="onChangePassword()" #pwForm="ngForm">
+            <div class="row g-3">
+              <div class="col-md-6 col-12">
+                <label class="form-label">Contraseña actual <span class="text-danger">*</span></label>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="Ingrese su contraseña actual"
+                  [value]="currentPassword()"
+                  (input)="currentPassword.set($any($event.target).value)"
+                  required
+                >
+              </div>
+              <div class="col-md-6 col-12">
+                <!-- espacio para alinear en pantallas grandes -->
+              </div>
+              <div class="col-md-6 col-12">
+                <label class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="Mínimo 6 caracteres"
+                  [value]="newPassword()"
+                  (input)="newPassword.set($any($event.target).value)"
+                  required
+                >
+              </div>
+              <div class="col-md-6 col-12">
+                <label class="form-label">Confirmar nueva contraseña <span class="text-danger">*</span></label>
+                <input
+                  type="password"
+                  class="form-control"
+                  placeholder="Repita la nueva contraseña"
+                  [value]="confirmPassword()"
+                  (input)="confirmPassword.set($any($event.target).value)"
+                  required
+                >
+              </div>
+              <div class="col-12">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="isChangingPassword() || !currentPassword() || !newPassword() || !confirmPassword()"
+                >
+                  @if (isChangingPassword()) {
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    Guardando...
+                  } @else {
+                    <i class="ri-save-line me-1"></i> Cambiar contraseña
+                  }
+                </button>
+              </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+      <!-- Información adicional -->
+      <div class="card">
+        <div class="card-header border-0">
+          <h5 class="card-title mb-0">
+            <i class="ri-information-line me-2"></i>Información de la cuenta
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4 col-6">
+              <p class="text-muted mb-1" style="font-size: 0.8rem;">Nombre</p>
+              <p class="fw-semibold mb-0">{{ profile()!.first_name || '—' }}</p>
+            </div>
+            <div class="col-md-4 col-6">
+              <p class="text-muted mb-1" style="font-size: 0.8rem;">Apellido</p>
+              <p class="fw-semibold mb-0">{{ profile()!.last_name || '—' }}</p>
+            </div>
+            <div class="col-md-4 col-6">
+              <p class="text-muted mb-1" style="font-size: 0.8rem;">Estado</p>
+              <p class="mb-0">
+                @if (profile()!.is_active) {
+                  <span class="badge bg-success-subtle text-success">Activo</span>
+                } @else {
+                  <span class="badge bg-danger-subtle text-danger">Inactivo</span>
+                }
+              </p>
+            </div>
+            <div class="col-md-4 col-6">
+              <p class="text-muted mb-1" style="font-size: 0.8rem;">Correo electrónico</p>
+              <p class="fw-semibold mb-0">{{ profile()!.email }}</p>
+            </div>
+            <div class="col-md-4 col-6">
+              <p class="text-muted mb-1" style="font-size: 0.8rem;">Nombre de usuario</p>
+              <p class="fw-semibold mb-0">{{ profile()!.username }}</p>
+            </div>
+            <div class="col-md-4 col-6">
+              <p class="text-muted mb-1" style="font-size: 0.8rem;">Miembro desde</p>
+              <p class="fw-semibold mb-0">{{ profile()!.created_at ? profile()!.created_at.substring(0, 10) : '—' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
