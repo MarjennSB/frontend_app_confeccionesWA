@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { User, CreateUserDto, UpdateUserDto } from '../models/user.model';
+import { User, CreateUserDto, UpdateUserDto, Role } from '../models/user.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/users`;
+  private readonly rolesUrl = `${environment.apiUrl}/roles`;
 
   getAll(): Observable<User[]> {
     return this.http.get<User[]>(`${this.baseUrl}/all`);
@@ -27,5 +28,9 @@ export class UsersService {
 
   toggleActive(id: string): Observable<User> {
     return this.http.post<User>(`${this.baseUrl}/toggle/${id}`, {});
+  }
+
+  getRoles(): Observable<Role[]> {
+    return this.http.get<Role[]>(`${this.rolesUrl}/all`);
   }
 }

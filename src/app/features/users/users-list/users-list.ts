@@ -25,10 +25,7 @@ export class UsersListComponent implements OnInit {
   searchTerm = signal('');
   showPassword = signal(false);
 
-  readonly availableRoles: Role[] = [
-    { id: 1, name: 'Administrador' },
-    { id: 2, name: 'Operador' },
-  ];
+  availableRoles = signal<Role[]>([]);
 
   readonly userForm = this.fb.nonNullable.group({
     username: ['', [Validators.required, Validators.maxLength(50)]],
@@ -42,6 +39,13 @@ export class UsersListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadRoles();
+  }
+
+  loadRoles(): void {
+    this.usersService.getRoles().subscribe({
+      next: (roles) => this.availableRoles.set(roles),
+    });
   }
 
   loadUsers(): void {
