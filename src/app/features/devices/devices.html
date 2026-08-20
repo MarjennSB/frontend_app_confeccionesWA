@@ -32,12 +32,22 @@
             </div>
           </div>
           <div class="col-sm-auto">
-            <div class="search-box">
-              <input type="text" class="form-control bg-light border-light"
-                placeholder="Buscar por IP, MAC, Hostname..."
-                [value]="searchTerm()"
-                (input)="onSearch($any($event.target).value)">
-              <i class="ri-search-line search-icon"></i>
+            <div class="d-flex flex-wrap align-items-start gap-2">
+              <button type="button" class="btn btn-primary" (click)="onSyncSheets()" [disabled]="isSyncing">
+                @if (isSyncing) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  Sincronizando...
+                } @else {
+                  <i class="ri-refresh-line me-1 align-bottom"></i> Sincronizar Google Sheets
+                }
+              </button>
+              <div class="search-box">
+                <input type="text" class="form-control bg-light border-light"
+                  placeholder="Buscar por IP, MAC, Hostname..."
+                  [value]="searchTerm()"
+                  (input)="onSearch($any($event.target).value)">
+                <i class="ri-search-line search-icon"></i>
+              </div>
             </div>
           </div>
         </div>
@@ -50,6 +60,9 @@
                 <th>IP</th>
                 <th>MAC Address</th>
                 <th>Hostname</th>
+                <th>Procesador</th>
+                <th>RAM</th>
+                <th>Gráfica</th>
                 <th>Última Vez Visto</th>
                 <th>Estado</th>
                 <th>VIP / Crítico</th>
@@ -60,7 +73,7 @@
               
               @if (isLoading) {
                 <tr>
-                  <td colspan="6" class="text-center p-4">
+                  <td colspan="10" class="text-center p-4">
                     <div class="spinner-border text-primary" role="status">
                       <span class="visually-hidden">Cargando dispositivos...</span>
                     </div>
@@ -73,6 +86,15 @@
                   <td>{{ device.ip }}</td>
                   <td>{{ device.mac_address || 'Desconocida' }}</td>
                   <td>{{ device.hostname || 'Desconocido' }}</td>
+                  <td>{{ device.inventory?.cpu_model || '-' }}</td>
+                  <td>
+                    @if (device.inventory?.ram_mb) {
+                      {{ (device.inventory?.ram_mb || 0) / 1024 }} GB
+                    } @else {
+                      -
+                    }
+                  </td>
+                  <td>{{ device.inventory?.description || '-' }}</td>
                   <td>{{ device.last_seen_at | date:'short' }}</td>
                   <td>
                     @if (device.is_alive) {
@@ -98,7 +120,7 @@
 
               @if (!isLoading && filteredDevices().length === 0) {
                 <tr>
-                  <td colspan="6" class="text-center p-4">
+                  <td colspan="10" class="text-center p-4">
                     <div class="text-muted">No se encontraron dispositivos.</div>
                   </td>
                 </tr>
@@ -138,24 +160,25 @@
               </div>
             </div>
             <h5 class="mb-1">{{ selectedDevice.device?.ip }}</h5>
-            <p class="text-muted mb-0">{{ selectedDevice.device?.mac_address || 'MAC Desconocida' }}</p>
+            <p class="text-muted mb-0 fs-13">{{ selectedDevice.device?.mac_address || 'Sin MAC' }}</p>
             <div class="mt-2">
               @if (selectedDevice.device?.is_alive) {
-                <span class="badge bg-success-subtle text-success">Online</span>
+                <span class="badge bg-success">Online</span>
               } @else {
-                <span class="badge bg-danger-subtle text-danger">Offline</span>
+                <span class="badge bg-danger">Offline</span>
               }
             </div>
           </div>
 
-          <!-- Detalles Básicos -->
+          <hr class="my-4 border-dashed">
+
           <h6 class="fs-14 mb-3 text-uppercase text-muted">Información General</h6>
           <div class="table-responsive">
             <table class="table table-sm table-borderless align-middle mb-0">
               <tbody>
                 <tr>
                   <td class="fw-medium">Hostname</td>
-                  <td>{{ selectedDevice.device?.hostname || 'N/A' }}</td>
+                  <td>{{ (selectedDevice.device?.hostname === 'unknown' ? 'Desconocido' : selectedDevice.device?.hostname) || 'N/A' }}</td>
                 </tr>
                 <tr>
                   <td class="fw-medium">Última Vez Visto</td>
@@ -172,22 +195,50 @@
           <hr class="my-4 border-dashed">
 
           <!-- Inventario / Hardware -->
-          <h6 class="fs-14 mb-3 text-uppercase text-muted">Hardware / OS</h6>
-          @if (selectedDevice.inventory) {
+          <h6 class="fs-14 mb-3 text-uppercase text-muted">Hardware / OS / Detalles</h6>
+          @if (selectedDevice.inventory && selectedDevice.inventory.read_method !== 'none') {
             <div class="table-responsive">
               <table class="table table-sm table-borderless align-middle mb-0">
                 <tbody>
                   <tr>
-                    <td class="fw-medium">Vendor</td>
-                    <td>{{ selectedDevice.inventory.vendor || 'Desconocido' }}</td>
+                    <td class="fw-medium">Fabricante</td>
+                    <td>{{ (selectedDevice.inventory.manufacturer === 'unknown' ? 'Desconocido' : selectedDevice.inventory.manufacturer) || 'Desconocido' }}</td>
                   </tr>
                   <tr>
-                    <td class="fw-medium">OS</td>
-                    <td>{{ selectedDevice.inventory.os_family || 'N/A' }} {{ selectedDevice.inventory.os_version || '' }}</td>
+                    <td class="fw-medium">Modelo</td>
+                    <td>{{ (selectedDevice.inventory.model === 'unknown' ? 'Desconocido' : selectedDevice.inventory.model) || 'Desconocido' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-medium">Sistema Operativo</td>
+                    <td>{{ selectedDevice.inventory.os_info || 'N/A' }}</td>
                   </tr>
                   <tr>
                     <td class="fw-medium">Dispositivo</td>
-                    <td>{{ selectedDevice.inventory.device_type || 'N/A' }}</td>
+                    <td>{{ (selectedDevice.inventory.device_type === 'unknown' ? 'Desconocido' : selectedDevice.inventory.device_type) || 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-medium">Procesador</td>
+                    <td>{{ selectedDevice.inventory.cpu_model || 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-medium">Memoria RAM</td>
+                    <td>{{ selectedDevice.inventory.ram_mb ? (selectedDevice.inventory.ram_mb + ' MB') : 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-medium">Disco Duro</td>
+                    <td>{{ selectedDevice.inventory.disk_gb ? (selectedDevice.inventory.disk_gb + ' GB') : 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-medium">Ubicación</td>
+                    <td>{{ selectedDevice.inventory.location || 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-medium">Contacto</td>
+                    <td>{{ selectedDevice.inventory.contact || 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="fw-medium">Gráfica</td>
+                    <td class="text-wrap" style="max-width: 200px;">{{ selectedDevice.inventory.description || 'N/A' }}</td>
                   </tr>
                 </tbody>
               </table>

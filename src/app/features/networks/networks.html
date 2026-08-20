@@ -118,7 +118,6 @@
                 [class.is-invalid]="isFieldInvalid('cidr')"
                 placeholder="Ej: 192.168.1.0/24"
                 formControlName="cidr"
-                [readonly]="isEditing()"
               >
               @if (isFieldInvalid('cidr')) {
                 <div class="invalid-feedback">El CIDR es obligatorio.</div>

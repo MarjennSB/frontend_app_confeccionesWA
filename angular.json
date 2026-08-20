@@ -65,10 +65,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "frontend-certificates:build:production"
+              "buildTarget": "MvpMonitoreo_frontend:build:production"
             },
             "development": {
-              "buildTarget": "frontend-certificates:build:development"
+              "buildTarget": "MvpMonitoreo_frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

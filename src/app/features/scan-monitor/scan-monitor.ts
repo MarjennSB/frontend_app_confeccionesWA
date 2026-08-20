@@ -84,6 +84,20 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
         console.log('[ScanMonitor] Recibido update por WS', msg.devices.length, 'dispositivos');
         this.mergeDevicesIntoGrid(msg.devices);
         this.isScanning = false;
+      } else if (msg.type === 'host_discovered') {
+        console.log('[ScanMonitor] host_discovered:', msg);
+        const idx = this.gridIps.findIndex(g => g.address === msg['ip']);
+        if (idx !== -1) {
+          if (msg['is_alive']) {
+             this.gridIps[idx].status = 'alive';
+          } else {
+             // Si la caja ya tenía un dispositivo asignado pero no respondió al ping,
+             // la marcamos como caída. Si estaba "free", se mantiene "free".
+             if (this.gridIps[idx].status === 'alive' || this.gridIps[idx].status === 'down') {
+                this.gridIps[idx].status = 'down';
+             }
+          }
+        }
       } else if (msg.type === 'status_update') {
         this.scannerMode = msg.mode || '';
         this.isScanning = !!msg.is_scanning;
@@ -150,20 +164,46 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
     this.wsService.connect(this.selectedNetworkId);
   }
 
-  // Genera las 254 IPs vacías basadas en el CIDR
+  ipToLong(ip: string): number {
+    return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+  }
+
+  longToIp(long: number): string {
+    return [
+      (long >>> 24) & 255,
+      (long >>> 16) & 255,
+      (long >>> 8) & 255,
+      long & 255
+    ].join('.');
+  }
+
+  // Genera las IPs vacías dinámicamente basadas en la máscara CIDR (ej. /26 = 62 hosts)
   generateBaseGrid() {
     this.gridIps = [];
     if (!this.selectedNetwork) return;
 
-    // Extraer base IP. Ej: "192.168.1.0/24" -> "192.168.1"
-    const baseIpPart = this.selectedNetwork.cidr.split('.')[0] + '.' + 
-                       this.selectedNetwork.cidr.split('.')[1] + '.' + 
-                       this.selectedNetwork.cidr.split('.')[2];
+    const parts = this.selectedNetwork.cidr.split('/');
+    const ipStr = parts[0];
+    const prefix = parseInt(parts[1], 10) || 24;
 
-    for (let i = 1; i <= 254; i++) {
+    const ipLong = this.ipToLong(ipStr);
+    const mask = (0xFFFFFFFF << (32 - prefix)) >>> 0;
+    
+    const networkLong = (ipLong & mask) >>> 0;
+    const broadcastLong = (networkLong | ~mask) >>> 0;
+
+    // IPs usables excluyen la de red y el broadcast
+    const startIp = networkLong + 1;
+    const endIp = broadcastLong - 1;
+
+    for (let i = startIp; i <= endIp; i++) {
+      const address = this.longToIp(i);
+      // Extraemos el último octeto de la IP para mostrarlo bonito en la caja (id visual)
+      const lastOctet = parseInt(address.split('.').pop() || '0', 10);
+      
       this.gridIps.push({
-        id: i,
-        address: `${baseIpPart}.${i}`,
+        id: lastOctet,
+        address: address,
         status: 'free',
         statusLabel: 'Libre (No vista)',
         user: 'Desconocido'
@@ -192,9 +232,8 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
 
     // Map real devices
     devices.forEach(device => {
-      // Find the last octet
-      const lastOctet = parseInt(device.ip.split('.').pop() || '0');
-      const box = this.gridIps.find(b => b.id === lastOctet);
+      // Buscar directamente por dirección IP exacta
+      const box = this.gridIps.find(b => b.address === device.ip);
       
       if (box) {
         if (device.is_alive) {

@@ -121,6 +121,7 @@ export class Networks implements OnInit {
 
     if (this.isEditing() && this.editingId()) {
       const updateData = {
+        cidr: data.cidr,
         vlan_id: data.vlan_id,
         scan_interval: data.scan_interval,
         is_active: data.is_active

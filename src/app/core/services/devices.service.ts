@@ -43,4 +43,9 @@ export class DevicesService {
     const url = `${this.baseApiUrl}/devices/${deviceId}/vip`;
     return this.http.put<Device>(url, { is_critical: isCritical });
   }
+
+  syncInventoryFromSheets(): Observable<any> {
+    const url = `${this.baseApiUrl}/inventory/sync-sheets`;
+    return this.http.post<any>(url, {});
+  }
 }

@@ -1,4 +1,4 @@
-
+import { DeviceInventory } from './device-inventory.model';
 
 export interface Device {
     id: number;
@@ -12,6 +12,7 @@ export interface Device {
     first_seen_at: string;
     last_seen_at: string;
     open_ports?: number[];
+    inventory?: DeviceInventory;
 }
 
 export interface CreateDeviceDto {

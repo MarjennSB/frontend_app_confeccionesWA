@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DevicesService } from '../../core/services/devices.service';
 import { NetworksService } from '../../core/services/networks.service';
+import { WebsocketService } from '../../core/services/websocket.service';
 import { Device } from '../../core/models/device.model';
 import { Network } from '../../core/models/network.model';
+import { Subscription } from 'rxjs';
 
 declare const bootstrap: any;
 
@@ -15,16 +17,20 @@ declare const bootstrap: any;
   templateUrl: './devices.html',
   styleUrls: ['./devices.css']
 })
-export class Devices implements OnInit {
+export class Devices implements OnInit, OnDestroy {
   private devicesService = inject(DevicesService);
   private networksService = inject(NetworksService);
+  private wsService = inject(WebsocketService);
 
   networks: Network[] = [];
   selectedNetworkId: number | null = null;
   
   devices = signal<Device[]>([]);
   isLoading = true;
+  isSyncing = false;
   totalItems = 0;
+  
+  private wsSubscription?: Subscription;
 
   searchTerm = signal('');
 
@@ -42,6 +48,22 @@ export class Devices implements OnInit {
 
   ngOnInit() {
     this.loadNetworks();
+    this.setupWebSocket();
+  }
+
+  ngOnDestroy() {
+    if (this.wsSubscription) {
+      this.wsSubscription.unsubscribe();
+    }
+  }
+
+  setupWebSocket() {
+    this.wsSubscription = this.wsService.onMessage().subscribe((msg: any) => {
+      if (msg.type === 'inventory_sync_complete') {
+        alert('¡Sincronización Completada!\n' + (msg.data.message || 'Inventario actualizado desde Google Sheets.'));
+        this.loadDevices(); // Recargar la tabla
+      }
+    });
   }
 
   loadNetworks() {
@@ -66,6 +88,24 @@ export class Devices implements OnInit {
 
   onSearch(term: string) {
     this.searchTerm.set(term);
+  }
+
+  onSyncSheets() {
+    this.isSyncing = true;
+    this.devicesService.syncInventoryFromSheets().subscribe({
+      next: (res) => {
+        this.isSyncing = false;
+        // La tabla se recargará automáticamente por el WebSocket, 
+        // pero por si acaso, lanzamos la notificación.
+        alert('¡Éxito!\n' + res.message);
+        this.loadDevices();
+      },
+      error: (err) => {
+        this.isSyncing = false;
+        console.error('Error al sincronizar Google Sheets', err);
+        alert('Error\nNo se pudo sincronizar el inventario.');
+      }
+    });
   }
 
   selectedDevice: any = null;
