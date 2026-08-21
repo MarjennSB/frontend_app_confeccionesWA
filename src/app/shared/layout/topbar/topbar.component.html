@@ -75,13 +75,19 @@
                 <div class="text-reset notification-item d-block dropdown-item position-relative">
                   <div class="d-flex">
                     <div class="avatar-xs me-3 flex-shrink-0">
-                      <span class="avatar-title bg-danger-subtle text-danger rounded-circle fs-16">
-                        <i class="bx bx-error"></i>
-                      </span>
+                      @if (latestAlert.type === 'CRITICAL_DEVICE_DOWN') {
+                        <span class="avatar-title bg-danger-subtle text-danger rounded-circle fs-16">
+                          <i class="bx bx-error"></i>
+                        </span>
+                      } @else {
+                        <span class="avatar-title bg-success-subtle text-success rounded-circle fs-16">
+                          <i class="bx bx-check-circle"></i>
+                        </span>
+                      }
                     </div>
                     <div class="flex-grow-1">
                       <a href="javascript:void(0);" class="stretched-link">
-                        <h6 class="mt-0 mb-1 fs-13 fw-semibold">VIP: {{ latestAlert.device.hostname }}</h6>
+                        <h6 class="mt-0 mb-1 fs-13 fw-semibold">VIP: {{ latestAlert.device.hostname }} ({{ latestAlert.device.ip }})</h6>
                       </a>
                       <div class="fs-13 text-muted">
                         <p class="mb-1">
@@ -146,15 +152,20 @@
 
 <!-- Toast de Alerta VIP Flotante -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 10050">
-  <div id="vipToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+  <div id="vipToast" class="toast align-items-center border-0" 
+       [class.text-bg-danger]="latestAlert?.type === 'CRITICAL_DEVICE_DOWN'"
+       [class.text-bg-success]="latestAlert?.type !== 'CRITICAL_DEVICE_DOWN'"
+       role="alert" aria-live="assertive" aria-atomic="true">
     <div class="d-flex">
       <div class="toast-body">
-        <i class="bx bx-error-circle fs-18 align-middle me-2"></i>
+        <i class="bx fs-18 align-middle me-2"
+           [class.bx-error-circle]="latestAlert?.type === 'CRITICAL_DEVICE_DOWN'"
+           [class.bx-check-circle]="latestAlert?.type !== 'CRITICAL_DEVICE_DOWN'"></i>
         <strong>¡ALERTA VIP!</strong> 
         @if (latestAlert?.type === 'CRITICAL_DEVICE_DOWN') {
-          El dispositivo <b>{{ latestAlert?.device?.hostname || latestAlert?.device?.ip }}</b> ha dejado de responder.
+          El dispositivo <b>{{ latestAlert?.device?.hostname }} ({{ latestAlert?.device?.ip }})</b> ha dejado de responder.
         } @else {
-          El dispositivo <b>{{ latestAlert?.device?.hostname || latestAlert?.device?.ip }}</b> se ha recuperado.
+          El dispositivo <b>{{ latestAlert?.device?.hostname }} ({{ latestAlert?.device?.ip }})</b> se ha recuperado.
         }
       </div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>

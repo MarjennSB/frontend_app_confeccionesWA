@@ -151,16 +151,27 @@ export class Networks implements OnInit {
     }
   }
 
+  networkToDeleteId: number | null = null;
+
   deleteNetwork(id: number) {
-    if (confirm('¿Estás seguro de eliminar esta red?')) {
-      this.networksService.deleteNetwork(id).subscribe({
+    this.networkToDeleteId = id;
+    this.getModal('deleteRecordModal').show();
+  }
+
+  confirmDelete() {
+    if (this.networkToDeleteId !== null) {
+      this.networksService.deleteNetwork(this.networkToDeleteId).subscribe({
         next: () => {
+          this.getModal('deleteRecordModal').hide();
           this.showSuccess('Red eliminada exitosamente.');
+          this.networkToDeleteId = null;
           this.loadNetworks();
         },
         error: (err) => {
           console.error('Error eliminando red', err);
+          this.getModal('deleteRecordModal').hide();
           this.errorMsg.set('Error eliminando la red.');
+          this.networkToDeleteId = null;
         }
       });
     }

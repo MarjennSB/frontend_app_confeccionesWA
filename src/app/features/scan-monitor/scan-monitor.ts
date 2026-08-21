@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NetworksService } from '../../core/services/networks.service';
@@ -7,6 +7,8 @@ import { WebsocketService } from '../../core/services/websocket.service';
 import { Network } from '../../core/models/network.model';
 import { Device } from '../../core/models/device.model';
 import { Subscription } from 'rxjs';
+import { Network as VisNetwork } from 'vis-network';
+import { DataSet } from 'vis-data';
 
 interface GridBox {
   id: number;
@@ -15,6 +17,10 @@ interface GridBox {
   statusLabel: string;
   user: string;
   openPorts?: string;
+  os?: string;
+  vendor?: string;
+  pulsing?: boolean;
+  isLocal?: boolean;
 }
 
 @Component({
@@ -24,7 +30,7 @@ interface GridBox {
   templateUrl: './scan-monitor.html',
   styleUrls: ['./scan-monitor.css']
 })
-export class ScanMonitorComponent implements OnInit, OnDestroy {
+export class ScanMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
   private networksService = inject(NetworksService);
   private devicesService = inject(DevicesService);
   private wsService = inject(WebsocketService);
@@ -44,6 +50,13 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
   
   private wsSubscription?: Subscription;
   private countdownTimer: any;
+
+  // Topology State
+  showTopology = true;
+  selectedNodeDetails: GridBox | null = null;
+  private networkInstance: any;
+  private nodesDataset: any;
+  private edgesDataset: any;
 
   get onlineCount(): number {
     return this.gridIps.filter(ip => ip.status === 'alive').length;
@@ -90,6 +103,30 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
         if (idx !== -1) {
           if (msg['is_alive']) {
              this.gridIps[idx].status = 'alive';
+             // Activar el pulso visual (Sonar Glow)
+             this.gridIps[idx].pulsing = true;
+             if (msg['os']) {
+                this.gridIps[idx].os = msg['os'];
+             }
+             if (msg['vendor']) {
+                this.gridIps[idx].vendor = msg['vendor'];
+             }
+             if (msg['is_local'] !== undefined) {
+                this.gridIps[idx].isLocal = msg['is_local'];
+             }
+             
+             // Guardar actualización parcial en caché local
+             this.saveToLocalCache(this.gridIps[idx].address, {
+                os: this.gridIps[idx].os,
+                vendor: this.gridIps[idx].vendor,
+                isLocal: this.gridIps[idx].isLocal
+             });
+             
+             setTimeout(() => {
+               if (this.gridIps[idx]) {
+                 this.gridIps[idx].pulsing = false;
+               }
+             }, 2000);
           } else {
              // Si la caja ya tenía un dispositivo asignado pero no respondió al ping,
              // la marcamos como caída. Si estaba "free", se mantiene "free".
@@ -97,6 +134,7 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
                 this.gridIps[idx].status = 'down';
              }
           }
+          this.updateNodeInTopology(this.gridIps[idx]);
         }
       } else if (msg.type === 'status_update') {
         this.scannerMode = msg.mode || '';
@@ -117,7 +155,197 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
     if (this.countdownTimer) {
       clearInterval(this.countdownTimer);
     }
+    if (this.networkInstance) {
+      this.networkInstance.destroy();
+    }
     this.wsService.disconnect();
+  }
+
+  ngAfterViewInit() {
+    // Initial topology render if switch is on
+    if (this.showTopology) {
+      this.initTopology();
+    }
+  }
+
+  toggleTopologyView(show: boolean) {
+    this.showTopology = show;
+    if (show) {
+      setTimeout(() => this.initTopology(), 100);
+    }
+  }
+
+  initTopology() {
+    const container = document.getElementById('topology-network');
+    if (!container) return;
+
+    this.nodesDataset = new DataSet();
+    this.edgesDataset = new DataSet();
+
+    const data = { nodes: this.nodesDataset, edges: this.edgesDataset };
+    
+    // Tema oscuro para que combine con el dashboard
+    const options = {
+      nodes: {
+        shape: 'dot',
+        size: 16,
+        font: { size: 14, color: '#ffffff', strokeWidth: 3, strokeColor: '#212529' },
+        borderWidth: 2,
+        shadow: true
+      },
+      edges: {
+        width: 1,
+        color: { color: '#495057', highlight: '#0ab39c' },
+        shadow: true,
+        smooth: { type: 'continuous' }
+      },
+      physics: {
+        forceAtlas2Based: {
+          gravitationalConstant: -80,
+          centralGravity: 0.005,
+          springLength: 250,
+          springConstant: 0.18,
+        },
+        maxVelocity: 146,
+        solver: 'forceAtlas2Based',
+        timestep: 0.35,
+        stabilization: { iterations: 150 }
+      },
+      interaction: {
+        hover: true,
+        tooltipDelay: 200,
+      }
+    };
+    
+    this.networkInstance = new VisNetwork(container, data, options);
+    
+    this.networkInstance.on('selectNode', (params: any) => {
+      const nodeId = params.nodes[0];
+      const node = this.nodesDataset.get(nodeId);
+      if (node && node.gridBox) {
+         this.selectedNodeDetails = node.gridBox;
+      }
+    });
+    
+    this.networkInstance.on('deselectNode', () => {
+      this.selectedNodeDetails = null;
+    });
+
+    this.buildTopologyFromGrid();
+  }
+
+  buildTopologyFromGrid() {
+    if (!this.nodesDataset || !this.selectedNetwork) return;
+
+    // Clear existing
+    this.nodesDataset.clear();
+    this.edgesDataset.clear();
+
+    // Add Central Router Node
+    this.nodesDataset.add({
+      id: 'router',
+      label: this.selectedNetwork.cidr,
+      shape: 'hexagon',
+      size: 35,
+      color: { background: '#299cdb', border: '#ffffff' },
+      font: { color: '#ffffff', size: 16, bold: true, strokeWidth: 3, strokeColor: '#212529' }
+    });
+
+    // Add active and down devices
+    const nodesToAdd: any[] = [];
+    const edgesToAdd: any[] = [];
+
+    this.gridIps.forEach(ip => {
+      if (ip.status !== 'free') {
+        let nodeColor = ip.status === 'alive' ? '#0ab39c' : '#f06548';
+        if (ip.isLocal) {
+            nodeColor = '#8a2be2'; // Púrpura para el servidor local
+        }
+        
+        const displayUser = (ip.user === 'unknown' || ip.user === 'Desconocido' || ip.user === 'Sin nombre') ? '' : ip.user;
+        const labelText = displayUser ? `${displayUser}\n${ip.address}` : ip.address;
+        
+        nodesToAdd.push({
+          id: ip.address,
+          label: labelText,
+          color: { background: nodeColor, border: '#ffffff' },
+          gridBox: ip
+        });
+        edgesToAdd.push({
+          from: 'router',
+          to: ip.address,
+          color: { color: nodeColor }
+        });
+      }
+    });
+
+    this.nodesDataset.add(nodesToAdd);
+    this.edgesDataset.add(edgesToAdd);
+  }
+
+  updateNodeInTopology(ip: GridBox) {
+    if (!this.nodesDataset) return;
+    
+    if (ip.status === 'free') {
+       if (this.nodesDataset.get(ip.address)) {
+          this.nodesDataset.remove(ip.address);
+       }
+       return;
+    }
+
+    let nodeColor = ip.status === 'alive' ? '#0ab39c' : '#f06548';
+    if (ip.isLocal) {
+        nodeColor = '#8a2be2'; // Púrpura para el servidor local
+    }
+    
+    const displayUser = (ip.user === 'unknown' || ip.user === 'Desconocido' || ip.user === 'Sin nombre') ? '' : ip.user;
+    const labelText = displayUser ? `${displayUser}\n${ip.address}` : ip.address;
+    const existingNode = this.nodesDataset.get(ip.address);
+
+    if (existingNode) {
+      this.nodesDataset.update({
+        id: ip.address,
+        label: labelText,
+        color: { background: nodeColor, border: '#ffffff' },
+        gridBox: ip
+      });
+      // Ensure edge has correct color
+      const edges = this.networkInstance.getConnectedEdges(ip.address);
+      if (edges && edges.length > 0) {
+         this.edgesDataset.update({ id: edges[0], color: { color: nodeColor } });
+      }
+    } else {
+      this.nodesDataset.add({
+        id: ip.address,
+        label: labelText,
+        color: { background: nodeColor, border: '#ffffff' },
+        gridBox: ip
+      });
+      this.edgesDataset.add({
+        from: 'router',
+        to: ip.address,
+        color: { color: nodeColor }
+      });
+    }
+
+    // Efecto visual "Sonar Glow" en el canvas
+    if (ip.pulsing && ip.status === 'alive') {
+       this.nodesDataset.update({
+          id: ip.address,
+          size: 26, // Crece temporalmente
+          shadow: { color: '#0ab39c', size: 30, x: 0, y: 0 } // Brillo intenso
+       });
+       
+       setTimeout(() => {
+          if (this.nodesDataset && this.nodesDataset.get(ip.address)) {
+             this.nodesDataset.update({
+                id: ip.address,
+                size: 16, // Vuelve a su tamaño original
+                shadow: true
+             });
+          }
+       }, 1000); // El pulso dura 1 segundo
+    }
   }
 
   private updateCountdown() {
@@ -228,6 +456,8 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
       box.status = 'free';
       box.statusLabel = 'Libre (No vista)';
       box.user = 'Desconocido';
+      box.os = undefined;
+      box.vendor = undefined;
     });
 
     // Map real devices
@@ -245,6 +475,23 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
         }
         
         box.user = device.hostname || device.mac_address || 'Sin nombre';
+        
+        // Propiedades de Fingerprinting dinámicas desde WS o Caché
+        const cache = this.getFromLocalCache(device.ip);
+        
+        box.os = (device as any).os || cache?.os;
+        box.vendor = (device as any).vendor || cache?.vendor;
+        box.isLocal = (device as any).is_local !== undefined ? (device as any).is_local : cache?.isLocal;
+
+        // Si vinieron datos frescos del WS, actualizar la caché
+        if ((device as any).os || (device as any).vendor) {
+           this.saveToLocalCache(device.ip, {
+              os: box.os,
+              vendor: box.vendor,
+              isLocal: box.isLocal
+           });
+        }
+
         if (device.open_ports && device.open_ports.length > 0) {
           box.openPorts = device.open_ports.join(', ');
         } else {
@@ -252,6 +499,9 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
         }
       }
     });
+    
+    // Sincronizar topología
+    this.buildTopologyFromGrid();
   }
 
   triggerScan() {
@@ -270,5 +520,27 @@ export class ScanMonitorComponent implements OnInit, OnDestroy {
         this.isScanning = false;
       }
     });
+  }
+
+  // --- Helpers de Caché Local ---
+  private getCacheKey(ip: string): string {
+    return `scann_device_cache_${ip}`;
+  }
+
+  private saveToLocalCache(ip: string, data: any) {
+    try {
+      localStorage.setItem(this.getCacheKey(ip), JSON.stringify(data));
+    } catch (e) {
+      console.warn('No se pudo guardar en localStorage', e);
+    }
+  }
+
+  private getFromLocalCache(ip: string): any {
+    try {
+      const item = localStorage.getItem(this.getCacheKey(ip));
+      return item ? JSON.parse(item) : null;
+    } catch (e) {
+      return null;
+    }
   }
 }
