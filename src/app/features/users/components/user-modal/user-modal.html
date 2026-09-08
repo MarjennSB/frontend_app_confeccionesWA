@@ -1,0 +1,97 @@
+<div class="modal fade" [class.show]="isOpen()" [style.display]="isOpen() ? 'block' : 'none'" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light border-bottom-0">
+        <h5 class="modal-title fw-bold text-gray-800">
+          {{ isEditMode() ? 'Editar Usuario' : 'Nuevo Usuario' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form [formGroup]="userForm" (ngSubmit)="save()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Nombres <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="first_name" placeholder="Ej. Juan">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Apellidos <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="last_name" placeholder="Ej. Pérez">
+            </div>
+            
+            <div class="col-md-4">
+              <label class="form-label fw-medium">Tipo Doc <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="document_type_id">
+                <option value="">Seleccione...</option>
+                @for(doc of documentTypes(); track doc.id) { <option [value]="doc.id">{{ doc.name }}</option> }
+                
+                
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-medium">Nro. Documento <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="document_number">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-medium">Género</label>
+              <select class="form-select" formControlName="genre_id">
+                <option value="">Seleccione...</option>
+                @for(genre of genres(); track genre.id) { <option [value]="genre.id">{{ genre.name }}</option> }
+                
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Nombre de Usuario <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="username">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Correo Electrónico <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" formControlName="email">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">
+                Contraseña
+                @if(!isEditMode()) { <span class="text-danger">*</span> }
+              </label>
+              <input type="password" class="form-control" formControlName="password" [placeholder]="isEditMode() ? 'Dejar vacío para no cambiar' : 'Contraseña segura'">
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Rol <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="role_id">
+                <option value="">Seleccione un rol...</option>
+                @for(role of roles(); track role.id) {
+                  <option [value]="role.id">{{ role.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12 mt-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="activeSwitch" formControlName="is_active">
+                <label class="form-check-label cursor-pointer" for="activeSwitch">Usuario Activo</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-light me-2 px-4" (click)="close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-4 shadow-sm" [disabled]="userForm.invalid || isSubmitting()">
+              @if(isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Guardando...
+              } @else {
+                <i class="ri-save-line me-1"></i> {{ isEditMode() ? 'Actualizar' : 'Guardar' }}
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Backdrop -->
+@if (isOpen()) {
+  <div class="modal-backdrop fade show"></div>
+}

@@ -1,35 +1,21 @@
-export interface Role {
-  id: number;
-  name: string;
-}
+import { DocumentType } from './document-type.model';
+import { Genre } from './genre.model';
+import { Role } from './role.model';
 
 export interface User {
   id: string;
-  username: string;
-  email: string;
   first_name?: string;
   last_name?: string;
+  username: string;
+  email: string;
+  document_number?: string;
+  document_type_id?: number | string;
+  genre_id?: number | string;
+  tipoDocumento?: DocumentType;
+  genre?: Genre;
+  role_id?: string | number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  roles: Role[];
-}
-
-export interface CreateUserDto {
-  username: string;
-  email: string;
-  password: string;
-  first_name?: string;
-  last_name?: string;
-  role_ids: number[];
-  is_active?: boolean;
-}
-
-export interface UpdateUserDto {
-  username?: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  role_ids?: number[];
-  is_active?: boolean;
+  roles?: Role[];
 }

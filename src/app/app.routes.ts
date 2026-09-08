@@ -25,22 +25,16 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/dashboard/dashboard').then(c => c.DashboardComponent)
             },
             {
-                path: 'scan-monitor',
-                loadComponent: () => import('./features/scan-monitor/scan-monitor').then(c => c.ScanMonitorComponent)
-            },
-            {
-                path: 'networks',
-                loadComponent: () => import('./features/networks/networks').then(c => c.Networks)
-            },
-            {
-                path: 'devices',
-                loadComponent: () => import('./features/devices/devices').then(c => c.Devices)
-            },
-            {
                 path: 'users',
                 canActivate: [rolesGuard],
-                data: { roles: ['Administrador'] },
+                data: { roles: ['Super-Admin'] },
                 loadComponent: () => import('./features/users/users-list/users-list').then(c => c.UsersListComponent)
+            },
+            {
+                path: 'roles',
+                canActivate: [rolesGuard],
+                data: { roles: ['Super-Admin'] },
+                loadComponent: () => import('./features/roles/roles-list/roles-list').then(c => c.RolesListComponent)
             },
             {
                 path: 'profile',

@@ -1,36 +1,34 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { User, CreateUserDto, UpdateUserDto, Role } from '../models/user.model';
 import { environment } from '../../../environments/environment';
+import { User } from '../models/user.model';
+import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class UsersService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/auth/users`;
-  private readonly rolesUrl = `${environment.apiUrl}/auth/roles`;
+  private readonly apiUrl = `${environment.apiUrl}/usuarios`;
 
-  getAll(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseUrl}/all`);
+  getUsers(): Observable<{ data: User[] }> {
+    return this.http.get<{ data: User[] }>(this.apiUrl);
   }
 
-  getById(id: string): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}/${id}`);
+  getUser(id: string): Observable<{ data: User }> {
+    return this.http.get<{ data: User }>(`${this.apiUrl}/${id}`);
   }
 
-  create(dto: CreateUserDto): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/auth/register`, dto);
+  createUser(data: CreateUserDto): Observable<{ data: User, message?: string }> {
+    return this.http.post<{ data: User, message?: string }>(this.apiUrl, data);
   }
 
-  update(id: string, dto: UpdateUserDto): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}/update/${id}`, dto);
+  updateUser(id: string, data: UpdateUserDto): Observable<{ data: User, message?: string }> {
+    return this.http.put<{ data: User, message?: string }>(`${this.apiUrl}/${id}`, data);
   }
 
-  toggleActive(id: string): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}/toggle/${id}`, {});
-  }
-
-  getRoles(): Observable<Role[]> {
-    return this.http.get<Role[]>(`${this.rolesUrl}/all`);
+  deleteUser(id: string): Observable<{ data: User, message?: string }> {
+    return this.http.delete<{ data: User, message?: string }>(`${this.apiUrl}/${id}`);
   }
 }

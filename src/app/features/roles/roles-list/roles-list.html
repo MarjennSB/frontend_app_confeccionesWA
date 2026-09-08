@@ -1,0 +1,56 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 mb-0 text-gray-800">Gestión de Roles</h2>
+    <button class="btn btn-primary shadow-sm" (click)="openModal()">
+      <i class="ri-add-line me-1"></i> Nuevo Rol
+    </button>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">ID (UUID)</th>
+              <th>Nombre del Rol</th>
+              <th class="text-end pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (role of roles(); track role.id) {
+              <tr>
+                <td class="ps-4 text-muted small">{{ role.id }}</td>
+                <td class="fw-medium">
+                  <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+                    {{ role.name }}
+                  </span>
+                </td>
+                <td class="text-end pe-4">
+                  <button class="btn btn-sm btn-light me-2" (click)="openModal(role)" title="Editar">
+                    <i class="ri-pencil-line text-primary"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="text-center py-4 text-muted">
+                  No hay roles registrados en el sistema.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (isModalOpen()) {
+  <app-role-modal 
+    [isOpen]="isModalOpen()" 
+    [role]="selectedRole()" 
+    (closeModal)="closeModal()" 
+    (roleSaved)="loadRoles()">
+  </app-role-modal>
+}

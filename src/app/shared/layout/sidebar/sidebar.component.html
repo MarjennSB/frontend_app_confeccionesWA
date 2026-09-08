@@ -17,9 +17,7 @@
         <img src="assets/images/logo.png" alt="" height="100">
       </span>
     </a>
-    <button type="button"
-      class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
-      id="vertical-hover">
+    <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
       <i class="ri-record-circle-line"></i>
     </button>
   </div>
@@ -27,8 +25,7 @@
   <div id="scrollbar">
     <div class="container-fluid">
       <ul class="navbar-nav" id="navbar-nav">
-
-        <li class="menu-title"><span>Monitoreo</span></li>
+        <li class="menu-title"><span>Home</span></li>
 
         <li class="nav-item">
           <a routerLink="/dashboard" routerLinkActive="active" class="nav-link menu-link">
@@ -37,46 +34,29 @@
           </a>
         </li>
 
+        @if (tokenService.hasRole('Super-Admin')) {
+
         <li class="nav-item">
-          <a class="nav-link menu-link" href="#sidebarMantenimiento" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarMantenimiento">
-            <i class="ri-settings-4-line"></i>
-            <span>Mantenimiento</span>
+          <a class="nav-link menu-link" href="#sidebarSeguridad" data-bs-toggle="collapse" role="button"
+            aria-expanded="false" aria-controls="sidebarSeguridad">
+            <i class="ri-shield-keyhole-line"></i>
+            <span>Seguridad</span>
           </a>
-          <div class="collapse menu-dropdown" id="sidebarMantenimiento">
+          <div class="collapse menu-dropdown" id="sidebarSeguridad">
             <ul class="nav nav-sm flex-column">
               <li class="nav-item">
-                <a routerLink="/networks" routerLinkActive="active" class="nav-link menu-link">
-                  Redes
+                <a routerLink="/users" routerLinkActive="active" class="nav-link menu-link">
+                  Usuarios
+                </a>
+              </li>
+              <li class="nav-item">
+                <a routerLink="/roles" routerLinkActive="active" class="nav-link menu-link">
+                  Roles
                 </a>
               </li>
             </ul>
           </div>
         </li>
-
-        <li class="nav-item">
-          <a routerLink="/devices" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-computer-line"></i>
-            <span>Dispositivos</span>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a routerLink="/scan-monitor" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-radar-line"></i>
-            <span>Escaneos</span>
-          </a>
-        </li>
-
-        <!-- ADMINISTRACIÓN: solo Administrador -->
-        @if (tokenService.hasRole('Administrador')) {
-          <li class="menu-title"><span>Administración</span></li>
-
-          <li class="nav-item">
-            <a routerLink="/users" routerLinkActive="active" class="nav-link menu-link">
-              <i class="ri-group-line"></i>
-              <span>Usuarios</span>
-            </a>
-          </li>
         }
       </ul>
     </div>

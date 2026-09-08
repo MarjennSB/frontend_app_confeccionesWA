@@ -1,116 +1,131 @@
-<div class="auth-page-wrapper pt-5">
-
-  <!-- auth page bg -->
-  <div class="auth-one-bg-position auth-one-bg" id="auth-particles">
+<div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
     <div class="bg-overlay"></div>
-    <div class="shape">
-      <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1440 120">
-        <path d="M 0,36 C 144,53.6 432,123.2 720,124 C 1008,124.8 1296,56.8 1440,40L1440 140L0 140z"></path>
-      </svg>
-    </div>
-  </div>
+    <!-- auth-page content -->
+    <div class="auth-page-content overflow-hidden pt-lg-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden m-0">
+                        <div class="row justify-content-center g-0">
+                            <div class="col-lg-6">
+                                <div class="p-lg-5 p-4 auth-one-bg h-100">
+                                    <div class="bg-overlay"></div>
+                                    <div class="position-relative h-100 d-flex flex-column">
+                                        <div class="mb-4">
+                                            <a href="javascript:void(0)" class="d-block">
+                                                <img src="assets/images/logo-light.png" alt="" height="18">
+                                            </a>
+                                        </div>
+                                        <div class="mt-auto">
+                                            <div class="mb-3">
+                                                <i class="ri-double-quotes-l display-4 text-success"></i>
+                                            </div>
 
-  <!-- auth page content -->
-  <div class="auth-page-content">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="text-center mt-sm-5 mb-4 text-white-50">
-            <div>
-              <a href="/" class="d-inline-block auth-logo">
-                <img src="assets/images/logo.png" alt="" height="200">
-              </a>
+                                            <div id="qoutescarouselIndicators" class="carousel slide" data-bs-ride="carousel">
+                                                <div class="carousel-indicators">
+                                                    <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                                                    <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                                                    <button type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                                                </div>
+                                                <div class="carousel-inner text-center text-white-50 pb-5">
+                                                    <div class="carousel-item active">
+                                                        <p class="fs-15 fst-italic">" Tu plataforma centralizada para el monitoreo de redes y dispositivos. "</p>
+                                                    </div>
+                                                    <div class="carousel-item">
+                                                        <p class="fs-15 fst-italic">" Garantiza la seguridad y estabilidad en tiempo real. "</p>
+                                                    </div>
+                                                    <div class="carousel-item">
+                                                        <p class="fs-15 fst-italic">" Gestión eficiente, rápida y segura en todo momento. "</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- end carousel -->
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="p-lg-5 p-4">
+                                    <div>
+                                        <h5 class="text-primary">Iniciar Sesión</h5>
+                                        <p class="text-muted">Ingresa tus credenciales para continuar.</p>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        @if (errorMessage()) {
+                                          <div class="alert alert-danger" role="alert">
+                                            {{ errorMessage() }}
+                                          </div>
+                                        }
+
+                                        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                                                <input type="email" class="form-control" id="email" formControlName="email" placeholder="ejemplo@correo.com" [class.is-invalid]="isFieldInvalid('email')">
+                                                @if (hasFieldError('email', 'required')) {
+                                                  <div class="invalid-feedback">El correo es obligatorio</div>
+                                                }
+                                                @if (hasFieldError('email', 'email')) {
+                                                  <div class="invalid-feedback">Formato de correo no válido</div>
+                                                }
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label" for="password-input">Contraseña <span class="text-danger">*</span></label>
+                                                <div class="position-relative auth-pass-inputgroup">
+                                                    <input type="password" class="form-control pe-5 password-input" formControlName="password" placeholder="Ingresa tu contraseña" id="password-input" [class.is-invalid]="isFieldInvalid('password')">
+                                                    <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
+                                                    @if (hasFieldError('password', 'required')) {
+                                                      <div class="invalid-feedback">La contraseña es requerida</div>
+                                                    }
+                                                    @if (hasFieldError('password', 'minlength')) {
+                                                      <div class="invalid-feedback">Mínimo 6 caracteres</div>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <button class="btn btn-success w-100" type="submit" [disabled]="loginForm.invalid || isLoading()">
+                                                  @if(isLoading()) {
+                                                    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Autenticando...
+                                                  } @else {
+                                                    Iniciar Sesión
+                                                  }
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end card -->
+                </div>
+                <!-- end col -->
             </div>
-            <p class="mt-3 fs-15 fw-medium">Sistema de Monitoreo de Redes</p>
-          </div>
+            <!-- end row -->
         </div>
-      </div>
+        <!-- end container -->
+    </div>
+    <!-- end auth page content -->
 
-      <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6 col-xl-5">
-          <div class="card mt-4">
-            <div class="card-body p-4">
-              <div class="text-center mt-2">
-                <h5 class="text-primary">Bienvenido</h5>
-                <p class="text-muted">Ingresa tus credenciales para continuar</p>
-              </div>
-
-              <div class="p-2 mt-4">
-                @if (errorMessage()) {
-                  <div class="alert alert-danger" role="alert">
-                    {{ errorMessage() }}
-                  </div>
-                }
-
-                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-
-                  <div class="mb-3">
-                    <label for="email" class="form-label">Correo Electrónico</label>
-                    <input
-                      type="email"
-                      id="email"
-                      class="form-control"
-                      formControlName="email"
-                      placeholder="ejemplo@entidad.gob.pe"
-                      autocomplete="email"
-                      [class.is-invalid]="isFieldInvalid('email')">
-                    @if (hasFieldError('email', 'required')) {
-                      <div class="invalid-feedback">El correo es obligatorio</div>
-                    }
-                    @if (hasFieldError('email', 'email')) {
-                      <div class="invalid-feedback">Formato de correo no válido</div>
-                    }
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input
-                      type="password"
-                      id="password"
-                      class="form-control"
-                      formControlName="password"
-                      placeholder="••••••••"
-                      autocomplete="current-password"
-                      [class.is-invalid]="isFieldInvalid('password')">
-                    @if (hasFieldError('password', 'required')) {
-                      <div class="invalid-feedback">La contraseña es requerida</div>
-                    }
-                    @if (hasFieldError('password', 'minlength')) {
-                      <div class="invalid-feedback">Mínimo 6 caracteres</div>
-                    }
-                  </div>
-
-                  <div class="mt-4">
-                    <button
-                      type="submit"
-                      class="btn btn-success w-100"
-                      [disabled]="loginForm.invalid || isLoading()">
-                      {{ isLoading() ? 'Autenticando...' : 'Iniciar Sesión' }}
-                    </button>
-                  </div>
-
-                </form>
-              </div>
+    <!-- footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="text-center">
+                        <p class="mb-0 text-muted">&copy;
+                            {{ currentYear }} Sistema de Monitoreo. Todos los derechos reservados.
+                        </p>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="text-center">
-            <p class="mb-0 text-muted">
-              &copy; {{ currentYear }} Sistema de Monitoreo de Redes. Todos los derechos reservados.
-            </p>   
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
-
+    </footer>
+    <!-- end Footer -->
 </div>
+<!-- end auth-page-wrapper -->

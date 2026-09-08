@@ -16,18 +16,12 @@ export class TokenService {
   readonly currentUser = computed(() => this._user());
   readonly userRoles = computed(() => this._user()?.roles ?? []);
 
-    hasRole(...roles: string[]): boolean {
-    const user = this.currentUser();
-    if (!user || !user.role_id) return false;
-    
-    // Mapeo del ID de rol de la base de datos a su nombre
-    let userRoleStr = '';
-    switch (user.role_id) {
-      case 1: userRoleStr = 'Administrador'; break;
-      case 2: userRoleStr = 'Usuario'; break;
-    }
+  hasRole(...roles: string[]): boolean {
+    const currentRoles = this.userRoles();
+    if (!currentRoles || currentRoles.length === 0) return false;
 
-    return roles.includes(userRoleStr);
+    // Verifica si alguno de los roles pasados existe en el arreglo de roles del usuario
+    return roles.some(role => currentRoles.includes(role));
   }
 
   saveToken(token: string): void {

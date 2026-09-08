@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "MvpMonitoreo_frontend": {
+    "Mvpmunives_digital_frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -65,10 +65,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "MvpMonitoreo_frontend:build:production"
+              "buildTarget": "Mvpmunives_digital_frontend:build:production"
             },
             "development": {
-              "buildTarget": "MvpMonitoreo_frontend:build:development"
+              "buildTarget": "Mvpmunives_digital_frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

@@ -1,0 +1,35 @@
+<div class="modal fade" [class.show]="isOpen()" [style.display]="isOpen() ? 'block' : 'none'" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light border-bottom-0">
+        <h5 class="modal-title fw-bold text-gray-800">
+          {{ isEditMode() ? 'Editar Rol' : 'Nuevo Rol' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form [formGroup]="roleForm" (ngSubmit)="save()">
+          <div class="mb-3">
+            <label class="form-label fw-medium">Nombre del Rol <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="name" placeholder="Ej. Administrador">
+          </div>
+
+          <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-light me-2 px-4" (click)="close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-4 shadow-sm" [disabled]="roleForm.invalid || isSubmitting()">
+              @if(isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Guardando...
+              } @else {
+                <i class="ri-save-line me-1"></i> {{ isEditMode() ? 'Actualizar' : 'Guardar' }}
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Backdrop -->
+@if (isOpen()) {
+  <div class="modal-backdrop fade show"></div>
+}
