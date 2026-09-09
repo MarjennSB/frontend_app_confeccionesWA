@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../core/services/auth';
-import { TokenService } from '../../../core/services/token';
+import { AuthService } from '../../../core/services/auth.service';
+import { TokenService } from '../../../core/services/token.service';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -15,20 +15,49 @@ import { Subscription } from 'rxjs';
 export class TopbarComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly tokenService = inject(TokenService);
-  
+
   readonly currentUser = this.tokenService.currentUser;
-  
+
   hasUnreadAlert = false;
   latestAlert: any = null;
   private wsSubscription?: Subscription;
+  private themeObserver?: MutationObserver;
 
   ngOnInit() {
+    this.setupThemeObserver();
+  }
+
+  setupThemeObserver(): void {
+    const html = document.documentElement;
     
+    // Set initial state
+    if (html.getAttribute('data-bs-theme') === 'dark') {
+      html.setAttribute('data-topbar', 'dark');
+    }
+
+    // Observe changes to data-bs-theme by app.js
+    this.themeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-bs-theme') {
+          const currentTheme = html.getAttribute('data-bs-theme');
+          if (currentTheme === 'dark') {
+            html.setAttribute('data-topbar', 'dark');
+          } else {
+            html.setAttribute('data-topbar', 'light');
+          }
+        }
+      });
+    });
+
+    this.themeObserver.observe(html, { attributes: true, attributeFilter: ['data-bs-theme'] });
   }
 
   ngOnDestroy() {
     if (this.wsSubscription) {
       this.wsSubscription.unsubscribe();
+    }
+    if (this.themeObserver) {
+      this.themeObserver.disconnect();
     }
   }
 
@@ -67,13 +96,13 @@ export class TopbarComponent implements OnInit, OnDestroy {
   toggleTheme(): void {
     const html = document.documentElement;
     const currentTheme = html.getAttribute('data-bs-theme');
-    
+
     if (currentTheme === 'dark') {
       html.setAttribute('data-bs-theme', 'light');
-      html.setAttribute('data-topbar', 'light');
+      sessionStorage.setItem('data-layout-mode', 'light');
     } else {
       html.setAttribute('data-bs-theme', 'dark');
-      html.setAttribute('data-topbar', 'dark');
+      sessionStorage.setItem('data-layout-mode', 'dark');
     }
   }
 
@@ -81,3 +110,4 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.authService.logout();
   }
 }
+

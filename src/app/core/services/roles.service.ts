@@ -15,6 +15,10 @@ export class RolesService {
     return this.http.get<{ data: Role[] }>(this.apiUrl);
   }
 
+  getPermissions(): Observable<{ data: any[] }> {
+    return this.http.get<{ data: any[] }>(`${this.apiUrl}/permissions`);
+  }
+
   getRole(id: string): Observable<{ data: Role }> {
     return this.http.get<{ data: Role }>(`${this.apiUrl}/${id}`);
   }

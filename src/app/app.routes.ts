@@ -25,6 +25,24 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/dashboard/dashboard').then(c => c.DashboardComponent)
             },
             {
+                path: 'services',
+                canActivate: [rolesGuard],
+                data: { roles: ['Super-Admin'] },
+                loadComponent: () => import('./features/service/services-list/services-list').then(c => c.ServicesListComponent)
+            },
+            {
+                path: 'contents',
+                canActivate: [rolesGuard],
+                data: { roles: ['Super-Admin'] },
+                loadComponent: () => import('./features/content/content-list/content-list').then(c => c.ContentListComponent)
+            },
+            {
+                path: 'notifications',
+                canActivate: [rolesGuard],
+                data: { roles: ['Super-Admin'] },
+                loadComponent: () => import('./features/notification/notification-list/notification-list').then(c => c.NotificationListComponent)
+            },
+            {
                 path: 'users',
                 canActivate: [rolesGuard],
                 data: { roles: ['Super-Admin'] },

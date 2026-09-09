@@ -12,32 +12,39 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th class="ps-4">ID (UUID)</th>
+              <th class="ps-4">ID</th>
               <th>Nombre del Rol</th>
-              <th class="text-end pe-4">Acciones</th>
+              <th>Permisos</th>
+              <th class="text-end pe-4 text-nowrap">Acciones</th>
             </tr>
           </thead>
           <tbody>
             @for (role of roles(); track role.id) {
-              <tr>
-                <td class="ps-4 text-muted small">{{ role.id }}</td>
-                <td class="fw-medium">
-                  <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
-                    {{ role.name }}
-                  </span>
-                </td>
-                <td class="text-end pe-4">
-                  <button class="btn btn-sm btn-light me-2" (click)="openModal(role)" title="Editar">
-                    <i class="ri-pencil-line text-primary"></i>
-                  </button>
-                </td>
-              </tr>
+            <tr>
+              <td class="ps-4 text-muted small">{{ role.id }}</td>
+              <td class="fw-medium">
+                <span
+                  class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+                  {{ role.name }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1">
+                  {{ role.permision?.length || 0 }} permisos
+                </span>
+              </td>
+              <td class="text-end pe-4 text-nowrap">
+                <button class="btn btn-sm btn-light me-2" (click)="openModal(role)" title="Editar">
+                  <i class="ri-pencil-line text-primary"></i>
+                </button>
+              </td>
+            </tr>
             } @empty {
-              <tr>
-                <td colspan="3" class="text-center py-4 text-muted">
-                  No hay roles registrados en el sistema.
-                </td>
-              </tr>
+            <tr>
+              <td colspan="4" class="text-center py-4 text-muted">
+                No hay roles registrados en el sistema.
+              </td>
+            </tr>
             }
           </tbody>
         </table>
@@ -47,10 +54,6 @@
 </div>
 
 @if (isModalOpen()) {
-  <app-role-modal 
-    [isOpen]="isModalOpen()" 
-    [role]="selectedRole()" 
-    (closeModal)="closeModal()" 
-    (roleSaved)="loadRoles()">
-  </app-role-modal>
+<app-role-modal [isOpen]="isModalOpen()" [role]="selectedRole()" (closeModal)="closeModal()" (roleSaved)="loadRoles()">
+</app-role-modal>
 }

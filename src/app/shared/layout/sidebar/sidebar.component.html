@@ -3,18 +3,18 @@
   <div class="navbar-brand-box">
     <a routerLink="/" class="logo logo-dark">
       <span class="logo-sm">
-        <img src="assets/images/logo.png" alt="" height="22">
+        <img src="assets/images/munives.png" alt="" height="30">
       </span>
       <span class="logo-lg">
-        <img src="assets/images/logo-dark.png" alt="" height="17">
+        <img src="assets/images/munives.png" alt="" height="60" class="mt-2">
       </span>
     </a>
     <a routerLink="/" class="logo logo-light">
       <span class="logo-sm">
-        <img src="assets/images/logo.png" alt="" height="60">
+        <img src="assets/images/munives.png" alt="" height="30">
       </span>
       <span class="logo-lg">
-        <img src="assets/images/logo.png" alt="" height="100">
+        <img src="assets/images/munives.png" alt="" height="60" class="mt-2">
       </span>
     </a>
     <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -24,17 +24,37 @@
 
   <div id="scrollbar">
     <div class="container-fluid">
-      <ul class="navbar-nav" id="navbar-nav">
-        <li class="menu-title"><span>Home</span></li>
+      <ul class="navbar-nav mt-4" id="navbar-nav">
 
         <li class="nav-item">
           <a routerLink="/dashboard" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-dashboard-2-line"></i>
+            <i class="ri-dashboard-3-line"></i>
             <span>Dashboard</span>
           </a>
         </li>
 
         @if (tokenService.hasRole('Super-Admin')) {
+
+        <li class="nav-item">
+          <a routerLink="/services" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-briefcase-4-line"></i>
+            <span>Servicios</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a routerLink="/contents" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-newspaper-line"></i>
+            <span>Contenido</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a routerLink="/notifications" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-notification-3-line"></i>
+            <span>Notificaciones</span>
+          </a>
+        </li>
 
         <li class="nav-item">
           <a class="nav-link menu-link" href="#sidebarSeguridad" data-bs-toggle="collapse" role="button"

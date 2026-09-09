@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { TokenService } from '../../../core/services/token';
+import { TokenService } from '../../../core/services/token.service';
 
 @Component({
   selector: 'app-sidebar',

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { SessionService } from '../../../core/services/session.service';
-import { TokenService } from '../../../core/services/token';
+import { TokenService } from '../../../core/services/token.service';
 
 @Component({
   selector: 'app-session-expired-modal',

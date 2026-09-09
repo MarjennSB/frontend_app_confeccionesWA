@@ -76,8 +76,8 @@
                                             <div class="mb-3">
                                                 <label class="form-label" for="password-input">Contraseña <span class="text-danger">*</span></label>
                                                 <div class="position-relative auth-pass-inputgroup">
-                                                    <input type="password" class="form-control pe-5 password-input" formControlName="password" placeholder="Ingresa tu contraseña" id="password-input" [class.is-invalid]="isFieldInvalid('password')">
-                                                    <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
+                                                    <input type="{{ passwordFieldType }}" class="form-control pe-5 password-input" formControlName="password" placeholder="Ingresa tu contraseña" id="password-input" [class.is-invalid]="isFieldInvalid('password')">
+                                                    <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon" (click)="togglePassword()"><i class="ri-eye-fill align-middle"></i></button>
                                                     @if (hasFieldError('password', 'required')) {
                                                       <div class="invalid-feedback">La contraseña es requerida</div>
                                                     }

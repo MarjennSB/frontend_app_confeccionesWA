@@ -1,7 +1,7 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
-import { TokenService } from '../services/token';
+import { TokenService } from '../services/token.service';
 import { SessionService } from '../services/session.service';
 
 export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {

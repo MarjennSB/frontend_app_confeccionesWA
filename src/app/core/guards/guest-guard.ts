@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { TokenService } from '../services/token';
+import { TokenService } from '../services/token.service';
 import { CanActivateFn, Router } from '@angular/router';
 
 export const guestGuard: CanActivateFn = () => {
