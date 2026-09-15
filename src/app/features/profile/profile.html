@@ -77,57 +77,8 @@
             </div>
           }
 
-          <form (ngSubmit)="onChangePassword()" #pwForm="ngForm">
-            <div class="row g-3">
-              <div class="col-lg-4 col-12">
-                <label class="form-label">Contraseña actual <span class="text-danger">*</span></label>
-                <input
-                  type="password"
-                  class="form-control"
-                  placeholder="Ingrese su contraseña actual"
-                  [value]="currentPassword()"
-                  (input)="currentPassword.set($any($event.target).value)"
-                  required
-                >
-              </div>
-              <div class="col-lg-4 col-12">
-                <label class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
-                <input
-                  type="password"
-                  class="form-control"
-                  placeholder="Mínimo 6 caracteres"
-                  [value]="newPassword()"
-                  (input)="newPassword.set($any($event.target).value)"
-                  required
-                >
-              </div>
-              <div class="col-lg-4 col-12">
-                <label class="form-label">Confirmar nueva contraseña <span class="text-danger">*</span></label>
-                <input
-                  type="password"
-                  class="form-control"
-                  placeholder="Repita la nueva contraseña"
-                  [value]="confirmPassword()"
-                  (input)="confirmPassword.set($any($event.target).value)"
-                  required
-                >
-              </div>
-              <div class="col-12">
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  [disabled]="isChangingPassword() || !currentPassword() || !newPassword() || !confirmPassword()"
-                >
-                  @if (isChangingPassword()) {
-                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                    Guardando...
-                  } @else {
-                    <i class="ri-save-line me-1"></i> Cambiar contraseña
-                  }
-                </button>
-              </div>
-            </div>
-          </form>
+          <!-- Formulario de cambio de contraseña removido porque el servicio de backend actual no lo provee -->
+          <p class="text-muted">Funcionalidad de cambio de contraseña pendiente de integración con el backend actual.</p>
 
         </div>
       </div>

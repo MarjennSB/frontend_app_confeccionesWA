@@ -1,0 +1,110 @@
+<div class="modal fade" [class.show]="isOpen()" [style.display]="isOpen() ? 'block' : 'none'" tabindex="-1" role="dialog" [attr.aria-hidden]="!isOpen() ? 'true' : null">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light border-bottom-0">
+        <h5 class="modal-title fw-bold text-gray-800">
+          {{ isEditMode() ? 'Editar Factura' : 'Nueva Factura' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form [formGroup]="invoiceForm" (ngSubmit)="save()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Número de Factura <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="invoice_number" placeholder="Ej. F001-0001">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Orden de Producción <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="text" class="form-control" [value]="selectedProdDisplay()" readonly placeholder="Seleccionar O/P...">
+                <button type="button" class="btn btn-outline-primary" (click)="openProdSelector()">
+                  <i class="ri-search-line"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger" (click)="clearProdSelection()" title="Limpiar O/P">
+                  <i class="ri-close-line"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Moneda <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="currency">
+                <option value="USD">Dólares (USD)</option>
+                <option value="PEN">Soles (PEN)</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Monto Total <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" formControlName="total_amount" step="0.01">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Fecha de Emisión <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" formControlName="issue_date">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Fecha de Vencimiento (Opcional)</label>
+              <input type="date" class="form-control" formControlName="due_date">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Estado de Pago</label>
+              <select class="form-select" formControlName="payment_status">
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="PAGADA">Pagada</option>
+                <option value="ANULADA">Anulada</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium">Archivo Adjunto <span class="text-danger">*</span></label>
+              <input type="file" class="form-control" [class.is-invalid]="fileError()" (change)="onFileChange($event)">
+              @if (fileError()) {
+                <div class="invalid-feedback">{{ fileError() }}</div>
+              }
+              @if (isEditMode() && invoice()?.attached_file) {
+                <small class="text-muted d-block mt-1">Ya hay un archivo adjunto. Sube uno nuevo para reemplazarlo.</small>
+              }
+            </div>
+
+            <div class="col-12 mt-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="activeInvoiceSwitch" formControlName="is_active">
+                <label class="form-check-label cursor-pointer" for="activeInvoiceSwitch">Factura Activa</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-light me-2 px-4" (click)="close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-4 shadow-sm" [disabled]="invoiceForm.invalid || isSubmitting()">
+              @if(isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Guardando...
+              } @else {
+                <i class="ri-save-line me-1"></i> {{ isEditMode() ? 'Actualizar' : 'Guardar' }}
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Selector de Producción -->
+@if (isProdSelectorOpen()) {
+  <app-production-selector-modal
+    [isOpen]="isProdSelectorOpen()"
+    (closeModal)="isProdSelectorOpen.set(false)"
+    (productionSelected)="onProdSelected($event)">
+  </app-production-selector-modal>
+}
+
+<!-- Backdrop Principal -->
+@if (isOpen()) {
+  <div class="modal-backdrop fade show"></div>
+}

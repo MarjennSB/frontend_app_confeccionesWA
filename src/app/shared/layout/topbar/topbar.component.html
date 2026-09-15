@@ -122,7 +122,7 @@
                 src="assets/images/users/avatar-1.jpg" alt="Avatar">
               <span class="text-start ms-xl-2">
                 <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">
-                  {{ currentUser()?.username || '' }}
+                  {{ currentUser()?.name || currentUser()?.email || 'Usuario' }}
                 </span>
                 <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">
                   {{ currentUser()?.roles?.[0] || '' }}
@@ -131,7 +131,7 @@
             </span>
           </button>
           <div class="dropdown-menu dropdown-menu-end">
-            <h6 class="dropdown-header">Bienvenido, {{ currentUser()?.last_name || '' }}</h6>
+            <h6 class="dropdown-header">Bienvenido, {{ currentUser()?.name || 'Usuario' }}</h6>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" routerLink="/profile">
               <i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i>

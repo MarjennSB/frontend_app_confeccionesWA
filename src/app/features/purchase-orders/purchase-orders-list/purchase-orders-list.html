@@ -1,0 +1,85 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 mb-0 text-gray-800">Lista Órden de Servicio</h2>
+    <div class="d-flex gap-3">
+      <div class="input-group shadow-sm" style="width: 280px;">
+        <span class="input-group-text bg-white border-end-0"><i class="ri-search-line text-muted"></i></span>
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número..."
+          [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
+      </div>
+      <button class="btn btn-primary shadow-sm text-nowrap" (click)="openModal()">
+        <i class="ri-add-line me-1"></i> Nueva Orden
+      </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>Nro. Orden</th>
+              <th>Precio Unitario</th>
+              <th>Fecha de Emisión</th>
+              <th>Archivo</th>
+              <th>Estado</th>
+              <th class="text-end pe-4 text-nowrap">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (po of purchaseOrders(); track po.id) {
+            <tr>
+              <td class="ps-4 fw-medium">{{ po.id }}</td>
+              <td><span class="badge bg-dark px-2 py-1 shadow-sm rounded-1">{{ po.order_number }}</span></td>
+              <td class="fw-bold">$ {{ po.unit_price | number:'1.2-2' }}</td>
+              <td>{{ po.issue_date || 'N/A' }}</td>
+              <td>
+                @if (po.attached_file) {
+                <a [href]="getDownloadUrl(po.attached_file)" target="_blank"
+                  class="btn btn-sm btn-outline-info shadow-sm px-2 py-1" title="Ver Archivo">
+                  <i class="ri-file-download-line"></i> Descargar
+                </a>
+                } @else {
+                <span class="text-muted"><i class="ri-file-forbid-line"></i> Sin archivo</span>
+                }
+              </td>
+              <td>
+                @if (po.is_active) {
+                <span class="badge bg-success px-2 py-1 shadow-sm rounded-1">Activo</span>
+                } @else {
+                <span class="badge bg-danger px-2 py-1 shadow-sm rounded-1">Inactivo</span>
+                }
+              </td>
+              <td class="text-end pe-4 text-nowrap">
+                <button class="btn btn-sm btn-outline-dark shadow-sm me-2 px-2 py-1" (click)="openModal(po)"
+                  title="Editar">
+                  <i class="ri-pencil-line"></i> Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger shadow-sm px-2 py-1" (click)="deletePurchaseOrder(po.id)"
+                  title="Eliminar">
+                  <i class="ri-delete-bin-line"></i> Eliminar
+                </button>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-4 text-muted">
+                No hay órdenes de compra registradas.
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal will be rendered if open -->
+@if (isModalOpen()) {
+<app-purchase-order-modal [isOpen]="isModalOpen()" [purchaseOrder]="selectedPurchaseOrder()" (closeModal)="closeModal()"
+  (purchaseOrderSaved)="loadPurchaseOrders()">
+</app-purchase-order-modal>
+}

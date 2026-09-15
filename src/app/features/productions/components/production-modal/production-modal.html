@@ -1,0 +1,154 @@
+<div class="modal fade" [class.show]="isOpen()" [style.display]="isOpen() ? 'block' : 'none'" tabindex="-1"
+  role="dialog" [attr.aria-hidden]="!isOpen() ? 'true' : null">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light border-bottom-0">
+        <h5 class="modal-title fw-bold text-gray-800">
+          {{ isEditMode() ? 'Editar Producción' : 'Nueva Producción' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+
+        <form [formGroup]="prodForm" (ngSubmit)="save()">
+          <div class="row g-3">
+            <div class="col-md-6">
+                  <label class="form-label fw-medium">Número O/C <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" [value]="selectedPoDisplay()" readonly
+                      placeholder="Seleccione O/C con la lupa...">
+                    <button type="button" class="btn btn-outline-primary" (click)="openPoSelector()">
+                      <i class="ri-search-line"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-medium">Número de O/P <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" formControlName="production_order_number"
+                    placeholder="Ej. OP-2024-001">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-medium">Cantidad <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" formControlName="quantity" min="1" placeholder="Ej. 100">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-medium">Precio Unit. <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" formControlName="unit_price" step="0.01" min="0">
+                </div>
+              </div>
+
+            <!-- Colores y Guías -->
+            <div class="row g-3 mt-1">
+              <div class="col-md-6">
+                <label class="form-label fw-medium"><i class="ri-palette-line me-1 text-primary"></i> Colores (1 o más) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input type="text" class="form-control" [value]="selectedColorsCount > 0 ? selectedColorsCount + ' colores seleccionados' : ''" readonly
+                    placeholder="Seleccione colores...">
+                  <button type="button" class="btn btn-outline-primary" (click)="openColorSelector()">
+                    <i class="ri-search-line"></i>
+                  </button>
+                </div>
+                @if (prodForm.get('colors')?.touched && prodForm.get('colors')?.value.length === 0) {
+                  <small class="text-danger">Debe seleccionar al menos un color.</small>
+                }
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-medium"><i class="ri-file-list-3-line me-1 text-primary"></i> Guías de Remisión (Máx. 9) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input type="text" class="form-control" [value]="selectedGuidesCount > 0 ? selectedGuidesCount + ' guías registradas' : ''" readonly
+                    placeholder="Gestione sus guías...">
+                  <button type="button" class="btn btn-outline-primary" (click)="openGuideManager()">
+                    <i class="ri-add-box-line"></i>
+                  </button>
+                </div>
+                @if (prodForm.get('guides')?.touched && prodForm.get('guides')?.value.length === 0) {
+                  <small class="text-danger">Debe seleccionar al menos una guía.</small>
+                }
+              </div>
+            </div>
+
+            <!-- Fecha y Estado -->
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label fw-medium"><i class="ri-calendar-event-line me-1 text-primary"></i> Fecha <span
+                      class="text-danger">*</span></label>
+                  <input type="date" class="form-control" formControlName="production_date">
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end">
+                  <div class="form-check form-switch mb-2">
+                    <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="activeProdSwitch"
+                      formControlName="is_active">
+                    <label class="form-check-label cursor-pointer" for="activeProdSwitch">Producción Activa</label>
+                  </div>
+                </div>
+            </div>
+
+          <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-light me-2 px-4" (click)="close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-4 shadow-sm"
+              [disabled]="prodForm.invalid || isSubmitting()">
+              @if(isSubmitting()) {
+              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Guardando...
+              } @else {
+              <i class="ri-save-line me-1"></i> {{ isEditMode() ? 'Actualizar' : 'Guardar' }}
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Nuevos Selectores -->
+@if (isColorSelectorOpen()) {
+<app-color-selector-modal [isOpen]="isColorSelectorOpen()" [selectedColorIds]="prodForm.get('colors')?.value || []" 
+  (closeModal)="isColorSelectorOpen.set(false)" (colorsSelected)="onColorsSelected($event)" 
+  (createNewColor)="openCreateColorModal()">
+</app-color-selector-modal>
+}
+
+@if (isGuideManagerOpen()) {
+<app-guide-manager-modal [isOpen]="isGuideManagerOpen()" [selectedGuideIds]="prodForm.get('guides')?.value || []"
+  (closeModal)="isGuideManagerOpen.set(false)" (guidesSelected)="onGuidesSelected($event)"
+  (createNewGuide)="openCreateGuideModal()">
+</app-guide-manager-modal>
+}
+
+<!-- Modal Selector de PO -->
+@if (isPoSelectorOpen()) {
+<app-po-selector-modal [isOpen]="isPoSelectorOpen()" (closeModal)="isPoSelectorOpen.set(false)"
+  (poSelected)="onPoSelected($event)" (createNewPo)="openCreatePoModal()">
+</app-po-selector-modal>
+}
+
+<!-- Modal de Crear PO -->
+@if (isCreatePoOpen()) {
+<app-purchase-order-modal [isOpen]="isCreatePoOpen()" [zIndex]="1070" (closeModal)="closeCreatePoModal()"
+  (purchaseOrderSaved)="onPurchaseOrderCreated()">
+</app-purchase-order-modal>
+}
+
+<!-- Modal de Crear Color -->
+@if (isCreateColorOpen()) {
+<app-color-modal [isOpen]="isCreateColorOpen()" [zIndex]="1070" (closeModal)="isCreateColorOpen.set(false)"
+  (colorSaved)="onColorCreated()">
+</app-color-modal>
+}
+
+<!-- Modal de Crear Guía -->
+@if (isCreateGuideOpen()) {
+<app-guide-modal [isOpen]="isCreateGuideOpen()" [zIndex]="1070" (closeModal)="isCreateGuideOpen.set(false)"
+  (guideSaved)="onGuideCreated()">
+</app-guide-modal>
+}
+
+<!-- Backdrop Principal -->
+@if (isOpen()) {
+<div class="modal-backdrop fade show"></div>
+}

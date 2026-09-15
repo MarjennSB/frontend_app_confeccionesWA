@@ -37,11 +37,11 @@ export class UserModalComponent {
 
   userForm: FormGroup = this.fb.group({
     first_name: ['', Validators.required],
-    last_name: ['', Validators.required],
+    last_name_father: ['', Validators.required],
+    last_name_mother: ['', Validators.required],
     document_type_id: ['', Validators.required],
     document_number: ['', Validators.required],
-    genre_id: [''],
-    username: ['', Validators.required],
+    gender_id: [''],
     email: ['', [Validators.required, Validators.email]],
     password: [''],
     role_id: ['', Validators.required],
@@ -57,11 +57,11 @@ export class UserModalComponent {
           this.isEditMode.set(true);
           this.userForm.patchValue({
             first_name: currentUser.first_name,
-            last_name: currentUser.last_name,
+            last_name_father: currentUser.last_name_father,
+            last_name_mother: currentUser.last_name_mother,
             document_type_id: currentUser.document_type_id,
             document_number: currentUser.document_number,
-            genre_id: currentUser.genre_id,
-            username: currentUser.username,
+            gender_id: currentUser.gender_id,
             email: currentUser.email,
             password: '',
             role_id: currentUser.roles && currentUser.roles.length > 0 ? currentUser.roles[0].id : '',
@@ -81,19 +81,19 @@ export class UserModalComponent {
   loadSelectData(): void {
     if (this.roles().length === 0) {
       this.rolesService.getRoles().subscribe({
-        next: (res) => this.roles.set(res.data),
+        next: (res) => this.roles.set(res.roles),
         error: (err) => console.error('Error cargando roles', err)
       });
     }
     if (this.documentTypes().length === 0) {
       this.documentTypesService.getDocumentTypes().subscribe({
-        next: (res) => this.documentTypes.set(res.data),
+        next: (res) => this.documentTypes.set(res.document_types),
         error: (err) => console.error('Error cargando tipos de documento', err)
       });
     }
     if (this.genres().length === 0) {
       this.genresService.getGenres().subscribe({
-        next: (res) => this.genres.set(res.data),
+        next: (res) => this.genres.set(res.genders),
         error: (err) => console.error('Error cargando géneros', err)
       });
     }

@@ -1,33 +1,32 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Role } from '../models/role.model';
+import { Role, RoleListResponse, CreateRoleDto, UpdateRoleDto } from '../models/role.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class RolesService {
-  private readonly http = inject(HttpClient);
+  private readonly http   = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/roles`;
 
-  getRoles(): Observable<{ data: Role[] }> {
-    return this.http.get<{ data: Role[] }>(this.apiUrl);
+  /** GET /api/roles?search= */
+  getRoles(search: string = ''): Observable<RoleListResponse> {
+    const params = new HttpParams().set('search', search);
+    return this.http.get<RoleListResponse>(this.apiUrl, { params });
   }
 
-  getPermissions(): Observable<{ data: any[] }> {
-    return this.http.get<{ data: any[] }>(`${this.apiUrl}/permissions`);
+  /** GET /api/roles/{id} */
+  getRole(id: number | string): Observable<Role> {
+    return this.http.get<Role>(`${this.apiUrl}/${id}`);
   }
 
-  getRole(id: string): Observable<{ data: Role }> {
-    return this.http.get<{ data: Role }>(`${this.apiUrl}/${id}`);
+  /** POST /api/roles */
+  createRole(data: CreateRoleDto): Observable<{ mensaje: string; message: number }> {
+    return this.http.post<{ mensaje: string; message: number }>(this.apiUrl, data);
   }
 
-  createRole(data: { name: string }): Observable<{ data: Role, message?: string }> {
-    return this.http.post<{ data: Role, message?: string }>(this.apiUrl, data);
-  }
-
-  updateRole(id: string, data: { name: string }): Observable<{ data: Role, message?: string }> {
-    return this.http.put<{ data: Role, message?: string }>(`${this.apiUrl}/${id}`, data);
+  /** PUT /api/roles/{id} */
+  updateRole(id: number | string, data: UpdateRoleDto): Observable<{ mensaje: string; message: number }> {
+    return this.http.put<{ mensaje: string; message: number }>(`${this.apiUrl}/${id}`, data);
   }
 }

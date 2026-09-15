@@ -15,9 +15,13 @@
               <label class="form-label fw-medium">Nombres <span class="text-danger">*</span></label>
               <input type="text" class="form-control" formControlName="first_name" placeholder="Ej. Juan">
             </div>
-            <div class="col-md-6">
-              <label class="form-label fw-medium">Apellidos <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" formControlName="last_name" placeholder="Ej. Pérez">
+            <div class="col-md-3">
+              <label class="form-label fw-medium">Ap. Paterno <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="last_name_father" placeholder="Ej. Pérez">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-medium">Ap. Materno <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="last_name_mother" placeholder="Ej. Gómez">
             </div>
 
             <div class="col-md-4">
@@ -35,17 +39,13 @@
             </div>
             <div class="col-md-4">
               <label class="form-label fw-medium">Género</label>
-              <select class="form-select" formControlName="genre_id">
+              <select class="form-select" formControlName="gender_id">
                 <option [ngValue]="null" disabled>Seleccione un género</option>
                 @for(genre of genres(); track genre.id) { <option [value]="genre.id">{{ genre.name }}</option> }
 
               </select>
             </div>
 
-            <div class="col-md-6">
-              <label class="form-label fw-medium">Nombre de Usuario <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" formControlName="username">
-            </div>
             <div class="col-md-6">
               <label class="form-label fw-medium">Correo Electrónico <span class="text-danger">*</span></label>
               <input type="email" class="form-control" formControlName="email">

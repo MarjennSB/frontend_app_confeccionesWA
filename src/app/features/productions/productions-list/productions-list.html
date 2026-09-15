@@ -1,0 +1,94 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 mb-0 text-gray-800">Lista de Produccion</h2>
+    <div class="d-flex gap-3">
+      <div class="input-group shadow-sm" style="width: 280px;">
+        <span class="input-group-text bg-white border-end-0"><i class="ri-search-line text-muted"></i></span>
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número O/P..."
+          [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
+      </div>
+      <button class="btn btn-primary shadow-sm text-nowrap" (click)="openModal()">
+        <i class="ri-add-line me-1"></i> Nueva Producción
+      </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>Nro. O/P</th>
+              <th>Nro. O/C</th>
+              <th>Cantidad</th>
+              <th>P. Unitario</th>
+              <th>Colores</th>
+              <th>Guías</th>
+              <th>Estado</th>
+              <th class="text-end pe-4 text-nowrap">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (prod of productions(); track prod.id) {
+            <tr>
+              <td class="ps-4 fw-medium">{{ prod.id }}</td>
+              <td><span class="badge bg-dark px-2 py-1 shadow-sm rounded-1">{{ prod.production_order_number }}</span>
+              </td>
+              <td><span class="badge bg-secondary px-2 py-1 shadow-sm rounded-1">{{ prod.purchase_order_number }}</span>
+              </td>
+              <td>{{ prod.quantity }}</td>
+              <td class="fw-bold text-success">${{ prod.unit_price | number:'1.2-2' }}</td>
+              <td>
+                @if (prod.colors?.length) {
+                <span class="badge bg-dark px-2 py-1 shadow-sm rounded-1">{{ prod.colors?.length }} color(es)</span>
+                } @else {
+                <span class="text-muted small">-</span>
+                }
+              </td>
+              <td>
+                @if (prod.guides?.length) {
+                <span class="badge bg-secondary px-2 py-1 shadow-sm rounded-1">{{ prod.guides?.length }} guía(s)</span>
+                } @else {
+                <span class="text-muted small">-</span>
+                }
+              </td>
+              <td>
+                @if (prod.is_active) {
+                <span class="badge bg-success px-2 py-1 shadow-sm rounded-1">Activo</span>
+                } @else {
+                <span class="badge bg-danger px-2 py-1 shadow-sm rounded-1">Inactivo</span>
+                }
+              </td>
+              <td class="text-end pe-4 text-nowrap">
+                <button class="btn btn-sm btn-outline-dark shadow-sm me-2 px-2 py-1" (click)="openModal(prod)"
+                  title="Editar">
+                  <i class="ri-pencil-line"></i> Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger shadow-sm px-2 py-1" (click)="deleteProduction(prod.id)"
+                  title="Eliminar">
+                  <i class="ri-delete-bin-line"></i> Eliminar
+                </button>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="9" class="text-center py-4 text-muted">
+                No hay órdenes de producción registradas.
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal will be rendered if open -->
+@if (isModalOpen()) {
+<app-production-modal [isOpen]="isModalOpen()" [production]="selectedProduction()" (closeModal)="closeModal()"
+  (productionSaved)="loadProductions()">
+</app-production-modal>
+}

@@ -32,7 +32,7 @@ export class RoleModalComponent {
   });
 
   ngOnInit() {
-    this.loadPermissions();
+    // Los permisos disponibles se obtienen del rol actual al editarlo
   }
 
   constructor() {
@@ -55,12 +55,9 @@ export class RoleModalComponent {
   }
 
   loadPermissions() {
-    this.rolesService.getPermissions().subscribe({
-      next: (res) => {
-        this.allPermissions.set(res.data);
-        this.groupPermissions(res.data);
-      }
-    });
+    // El backend no expone un endpoint de permisos.
+    // Los permisos se gestionan directamente en el modal a través
+    // del campo permision_pluck del rol seleccionado.
   }
 
   groupPermissions(perms: any[]) {

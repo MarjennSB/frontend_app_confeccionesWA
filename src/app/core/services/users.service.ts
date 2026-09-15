@@ -1,34 +1,48 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { User } from '../models/user.model';
+import { User, UserListResponse } from '../models/user.model';
 import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class UsersService {
-  private readonly http = inject(HttpClient);
+  private readonly http   = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/usuarios`;
 
-  getUsers(): Observable<{ data: User[] }> {
-    return this.http.get<{ data: User[] }>(this.apiUrl);
+  /** GET /api/usuarios?search=&per_page= */
+  getUsers(search: string = '', perPage: number = 10): Observable<UserListResponse> {
+    const params = new HttpParams()
+      .set('search', search)
+      .set('per_page', perPage.toString());
+    return this.http.get<UserListResponse>(this.apiUrl, { params });
   }
 
-  getUser(id: string): Observable<{ data: User }> {
-    return this.http.get<{ data: User }>(`${this.apiUrl}/${id}`);
+  /** POST /api/usuarios  (multipart/form-data si lleva imagen) */
+  createUser(data: CreateUserDto): Observable<{ codigo: number; mensaje: string; usuario: User }> {
+    const formData = this.buildFormData(data);
+    return this.http.post<{ codigo: number; mensaje: string; usuario: User }>(this.apiUrl, formData);
   }
 
-  createUser(data: CreateUserDto): Observable<{ data: User, message?: string }> {
-    return this.http.post<{ data: User, message?: string }>(this.apiUrl, data);
+  /** PUT /api/usuarios/{id} (multipart/form-data si lleva imagen) */
+  updateUser(id: number | string, data: UpdateUserDto): Observable<{ mensaje: string; usuario: User }> {
+    const formData = this.buildFormData(data);
+    formData.append('_method', 'PUT');
+    return this.http.post<{ mensaje: string; usuario: User }>(`${this.apiUrl}/${id}`, formData);
   }
 
-  updateUser(id: string, data: UpdateUserDto): Observable<{ data: User, message?: string }> {
-    return this.http.put<{ data: User, message?: string }>(`${this.apiUrl}/${id}`, data);
-  }
-
-  deleteUser(id: string): Observable<{ data: User, message?: string }> {
-    return this.http.delete<{ data: User, message?: string }>(`${this.apiUrl}/${id}`);
+  // ─── Helper ───────────────────────────────────────────────
+  private buildFormData(data: CreateUserDto | UpdateUserDto): FormData {
+    const fd = new FormData();
+    (Object.keys(data) as (keyof typeof data)[]).forEach((key) => {
+      const val = data[key];
+      if (val === null || val === undefined) return;
+      if (key === 'image_url' && val instanceof File) {
+        fd.append('image_url', val, val.name);
+      } else {
+        fd.append(key, String(val));
+      }
+    });
+    return fd;
   }
 }

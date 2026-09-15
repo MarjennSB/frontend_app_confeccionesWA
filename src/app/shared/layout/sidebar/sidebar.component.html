@@ -33,26 +33,48 @@
           </a>
         </li>
 
-        @if (tokenService.hasRole('Super-Admin')) {
+        @if (tokenService.hasRole('ADMINISTRADOR')) {
 
         <li class="nav-item">
-          <a routerLink="/services" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-briefcase-4-line"></i>
-            <span>Servicios</span>
+          <a class="nav-link menu-link" href="#sidebarMantenimiento" data-bs-toggle="collapse" role="button"
+            aria-expanded="false" aria-controls="sidebarMantenimiento">
+            <i class="ri-shield-keyhole-line"></i>
+            <span>Mantenimiento</span>
+          </a>
+          <div class="collapse menu-dropdown" id="sidebarMantenimiento">
+            <ul class="nav nav-sm flex-column">
+              <li class="nav-item">
+                <a routerLink="/colores" routerLinkActive="active" class="nav-link menu-link">
+                  Color
+                </a>
+              </li>
+              <li class="nav-item">
+                <a routerLink="/purchase-orders" routerLinkActive="active" class="nav-link menu-link">
+                  Orden de Servicio
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a routerLink="/productions" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-t-shirt-line"></i>
+            <span>Produccion</span>
           </a>
         </li>
 
         <li class="nav-item">
-          <a routerLink="/contents" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-newspaper-line"></i>
-            <span>Contenido</span>
+          <a routerLink="/guides" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-file-text-line"></i>
+            <span>Guía de Remisión</span>
           </a>
         </li>
 
         <li class="nav-item">
-          <a routerLink="/notifications" routerLinkActive="active" class="nav-link menu-link">
-            <i class="ri-notification-3-line"></i>
-            <span>Notificaciones</span>
+          <a routerLink="/invoices" routerLinkActive="active" class="nav-link menu-link">
+            <i class="ri-bill-line"></i>
+            <span>factura</span>
           </a>
         </li>
 

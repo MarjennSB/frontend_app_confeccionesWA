@@ -22,7 +22,10 @@ export class UsersListComponent implements OnInit {
 
   loadUsers(): void {
     this.usersService.getUsers().subscribe({
-      next: (res) => this.users.set(res.data),
+      next: (res: any) => {
+        // La respuesta del backend devuelve 'usuarios' como un ResourceCollection con propiedad 'data'
+        this.users.set(res.usuarios?.data || []);
+      },
       error: (err: any) => console.error('Error cargando usuarios', err)
     });
   }
@@ -37,12 +40,16 @@ export class UsersListComponent implements OnInit {
     this.selectedUser.set(null);
   }
 
-  deleteUser(id: string): void {
+  deleteUser(id: any): void {
+    // Si se desea eliminar, implementar endpoint o usar desactivación lógica con update
+    /*
     if (confirm('¿Estás seguro de eliminar este usuario?')) {
       this.usersService.deleteUser(id).subscribe({
         next: () => this.loadUsers(),
         error: (err: any) => alert('Error al eliminar usuario')
       });
     }
+    */
+    alert('Funcionalidad de eliminación pendiente de confirmar con backend');
   }
 }

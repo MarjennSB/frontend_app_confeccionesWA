@@ -22,7 +22,7 @@ export class RolesListComponent implements OnInit {
 
   loadRoles(): void {
     this.rolesService.getRoles().subscribe({
-      next: (res) => this.roles.set(res.data),
+      next: (res) => this.roles.set(res.roles),
       error: (err) => console.error('Error cargando roles', err)
     });
   }

@@ -107,7 +107,14 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.authService.logout();
+    this.authService.logout().subscribe({
+      next: () => console.log('Cierre de sesión exitoso'),
+      error: (err) => {
+        console.error('Error al cerrar sesión', err);
+        // Si el backend falla (token expirado), forzamos cierre local
+        this.authService.logoutLocal();
+      }
+    });
   }
 }
 
