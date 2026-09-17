@@ -12,44 +12,97 @@ import { Guide } from '../../../../core/models/guide.model';
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-lg border-0">
           <div class="modal-header bg-light">
-            <h5 class="modal-title fw-bold">Guías de Remisión (Máx. 9)</h5>
+            <h5 class="modal-title fw-bold">Guías de Remisión (Máx. 10)</h5>
             <button type="button" class="btn-close" (click)="close()"></button>
           </div>
-          <div class="modal-body p-4">
-            
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="text-muted small">Registradas: <strong>{{ tempSelectedGuides().length }} / 9</strong></span>
-              <button class="btn btn-outline-primary btn-sm" (click)="triggerCreateNew()" [disabled]="tempSelectedGuides().length >= 9">
-                <i class="ri-add-line"></i> Registrar Guía
-              </button>
-            </div>
-            
-            <div class="border rounded p-0 overflow-hidden" style="max-height: 250px; overflow-y: auto; background: #f8f9fa;">
-              @if (displayGuides().length > 0) {
-                <ul class="list-group list-group-flush">
-                  @for (guide of displayGuides(); track guide.id) {
-                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent py-3">
-                      <div>
-                        <div class="fw-medium text-primary"><i class="ri-file-text-line me-1"></i> {{ guide.guide_number }}</div>
-                        <div class="small text-muted">{{ guide.issue_date ? (guide.issue_date | date:'dd/MM/yyyy') : 'Sin fecha' }}</div>
-                      </div>
-                      <button class="btn btn-sm btn-outline-danger" title="Quitar" (click)="removeGuide(guide.id)">
-                        <i class="ri-delete-bin-line"></i>
-                      </button>
-                    </li>
-                  }
-                </ul>
-              } @else {
+          <div class="modal-body p-3">
+
+            <!-- Pestañas -->
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'selected'" (click)="activeTab.set('selected')">
+                  <i class="ri-check-line me-1"></i>Asignadas <span class="badge bg-primary ms-1">{{ tempSelectedGuides().length }}</span>
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'available'" (click)="loadAvailable(); activeTab.set('available')">
+                  <i class="ri-search-line me-1"></i>Disponibles <span class="badge bg-secondary ms-1">{{ availableGuides().length }}</span>
+                </button>
+              </li>
+            </ul>
+
+            <!-- Pestaña: Asignadas -->
+            @if (activeTab() === 'selected') {
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small">Registradas: <strong>{{ tempSelectedGuides().length }} / 10</strong></span>
+                <button class="btn btn-outline-primary btn-sm" (click)="triggerCreateNew()" [disabled]="tempSelectedGuides().length >= 10">
+                  <i class="ri-add-line"></i> Registrar nueva guía
+                </button>
+              </div>
+              <div class="border rounded" style="max-height: 300px; overflow-y: auto; background: #f8f9fa;">
+                @if (displayGuides().length > 0) {
+                  <ul class="list-group list-group-flush">
+                    @for (guide of displayGuides(); track guide.id) {
+                      <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent py-2">
+                        <div>
+                          <div class="fw-medium text-primary"><i class="ri-file-text-line me-1"></i> {{ guide.guide_number }}</div>
+                          <div class="small text-muted">{{ guide.issue_date ? (guide.issue_date | date:'dd/MM/yyyy') : 'Sin fecha' }}</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" title="Quitar" (click)="removeGuide(guide.id)">
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <div class="p-4 text-center text-muted small">
+                    No hay guías asignadas. Ve a la pestaña <strong>Disponibles</strong> para seleccionar.
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Pestaña: Disponibles (no asignadas a ninguna producción) -->
+            @if (activeTab() === 'available') {
+              @if (loadingAvailable()) {
+                <div class="text-center py-4 text-muted small"><span class="spinner-border spinner-border-sm me-1"></span> Cargando guías...</div>
+              } @else if (availableGuides().length === 0) {
                 <div class="p-4 text-center text-muted small">
-                  No hay guías registradas para esta producción.
+                  No hay guías disponibles sin asignar. Registra una nueva desde la pestaña <strong>Asignadas</strong>.
+                </div>
+              } @else {
+                <p class="text-muted small mb-2">Selecciona las guías para añadirlas a esta producción:</p>
+                <div class="border rounded" style="max-height: 300px; overflow-y: auto; background: #f8f9fa;">
+                  <ul class="list-group list-group-flush">
+                    @for (guide of availableGuides(); track guide.id) {
+                      <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent py-2"
+                          [class.list-group-item-primary]="isGuideSelected(guide.id)">
+                        <div>
+                          <div class="fw-medium"><i class="ri-file-text-line me-1 text-secondary"></i> {{ guide.guide_number }}</div>
+                          <div class="small text-muted">{{ guide.issue_date ? (guide.issue_date | date:'dd/MM/yyyy') : 'Sin fecha' }}</div>
+                        </div>
+                        @if (isGuideSelected(guide.id)) {
+                          <button class="btn btn-sm btn-success" disabled>
+                            <i class="ri-check-line"></i> Añadida
+                          </button>
+                        } @else {
+                          <button class="btn btn-sm btn-outline-primary"
+                            [disabled]="tempSelectedGuides().length >= 10"
+                            (click)="addGuide(guide.id)">
+                            <i class="ri-add-line"></i> Añadir
+                          </button>
+                        }
+                      </li>
+                    }
+                  </ul>
                 </div>
               }
-            </div>
-            
-            <div class="d-flex justify-content-end mt-4">
-              <button type="button" class="btn btn-light me-2" (click)="close()">Cancelar</button>
-              <button type="button" class="btn btn-primary" (click)="confirmSelection()">Confirmar Selección</button>
-            </div>
+            }
+
+          </div>
+          <div class="modal-footer py-2">
+            <button type="button" class="btn btn-light me-2" (click)="close()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="confirmSelection()">Confirmar Selección</button>
           </div>
         </div>
       </div>
@@ -58,10 +111,10 @@ import { Guide } from '../../../../core/models/guide.model';
 })
 export class GuideManagerModalComponent implements OnInit {
   private readonly guidesService = inject(GuidesService);
-  
+
   isOpen = input.required<boolean>();
   selectedGuideIds = input<number[]>([]);
-  
+
   @Output() closeModal = new EventEmitter<number[]>();
   @Output() guidesSelected = new EventEmitter<number[]>();
   @Output() createNewGuide = new EventEmitter<void>();
@@ -69,12 +122,15 @@ export class GuideManagerModalComponent implements OnInit {
   allGuides = signal<Guide[]>([]);
   displayGuides = signal<Guide[]>([]);
   tempSelectedGuides = signal<number[]>([]);
+  availableGuides = signal<Guide[]>([]);
+  loadingAvailable = signal<boolean>(false);
+  activeTab = signal<'selected' | 'available'>('selected');
 
   constructor() {
-    // Reactivo a cambios en isOpen: cuando se abre, sincroniza la selección y carga guías
     effect(() => {
       if (this.isOpen()) {
         this.tempSelectedGuides.set([...this.selectedGuideIds()]);
+        this.activeTab.set('selected');
         this.loadGuides();
       }
     });
@@ -85,7 +141,7 @@ export class GuideManagerModalComponent implements OnInit {
   }
 
   loadGuides() {
-    this.guidesService.getGuides('', 200).subscribe({
+    this.guidesService.getGuides('', 1, 200).subscribe({
       next: (res) => {
         this.allGuides.set(res.guides.data);
         this.updateDisplayGuides();
@@ -94,8 +150,22 @@ export class GuideManagerModalComponent implements OnInit {
     });
   }
 
+  loadAvailable() {
+    this.loadingAvailable.set(true);
+    this.guidesService.getGuides('', 1, 200, true).subscribe({
+      next: (res) => {
+        this.availableGuides.set(res.guides.data);
+        this.loadingAvailable.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando guías disponibles', err);
+        this.loadingAvailable.set(false);
+      }
+    });
+  }
+
   reloadAndSync(newlyCreatedIds?: number[]) {
-    this.guidesService.getGuides('', 200).subscribe({
+    this.guidesService.getGuides('', 1, 200).subscribe({
       next: (res) => {
         this.allGuides.set(res.guides.data);
         if (newlyCreatedIds) {
@@ -114,11 +184,22 @@ export class GuideManagerModalComponent implements OnInit {
     this.displayGuides.set(all.filter(g => selected.includes(Number(g.id))));
   }
 
+  isGuideSelected(guideId: number | string): boolean {
+    return this.tempSelectedGuides().includes(Number(guideId));
+  }
+
+  addGuide(guideId: number | string) {
+    const id = Number(guideId);
+    if (this.tempSelectedGuides().length >= 10) return;
+    if (!this.isGuideSelected(id)) {
+      this.tempSelectedGuides.set([...this.tempSelectedGuides(), id]);
+      this.updateDisplayGuides();
+    }
+  }
+
   removeGuide(guideId: number | string) {
     const id = Number(guideId);
-    let current = [...this.tempSelectedGuides()];
-    current = current.filter(g => g !== id);
-    this.tempSelectedGuides.set(current);
+    this.tempSelectedGuides.set(this.tempSelectedGuides().filter(g => g !== id));
     this.updateDisplayGuides();
   }
 
@@ -128,7 +209,7 @@ export class GuideManagerModalComponent implements OnInit {
   }
 
   triggerCreateNew() {
-    if (this.tempSelectedGuides().length >= 9) return;
+    if (this.tempSelectedGuides().length >= 10) return;
     this.createNewGuide.emit();
   }
 

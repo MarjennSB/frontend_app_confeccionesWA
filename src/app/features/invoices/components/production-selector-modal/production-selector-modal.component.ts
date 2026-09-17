@@ -80,7 +80,7 @@ export class ProductionSelectorModalComponent {
   }
 
   loadProductions() {
-    this.prodService.getProductions(this.searchTerm(), 10).subscribe({
+    this.prodService.getProductions(this.searchTerm(), 1, 10).subscribe({
       next: (res) => this.productions.set(res.productions.data),
       error: (err) => console.error('Error', err)
     });

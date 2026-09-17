@@ -94,7 +94,7 @@ export class ColorSelectorModalComponent implements OnInit {
   }
 
   loadColors() {
-    this.colorsService.getColors(this.searchTerm(), 100).subscribe({
+    this.colorsService.getColors(this.searchTerm(), 1, 100).subscribe({
       next: (res) => this.colors.set(res.colores.data),
       error: (err) => console.error('Error', err)
     });

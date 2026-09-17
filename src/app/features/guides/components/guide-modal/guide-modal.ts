@@ -19,12 +19,13 @@ export class GuideModalComponent implements OnInit {
   zIndex = input<number>(1055);
 
   @Output() closeModal = new EventEmitter<void>();
-  @Output() guideSaved = new EventEmitter<void>();
+  @Output() guideSaved = new EventEmitter<number | null>(); // emite el id de la guía creada/editada
 
   readonly isEditMode = signal<boolean>(false);
   readonly isSubmitting = signal<boolean>(false);
   readonly fileError = signal<string | null>(null);
   readonly backendError = signal<string | null>(null);
+  readonly generalError = signal<string | null>(null);
 
   selectedFile: File | null = null;
 
@@ -70,6 +71,7 @@ export class GuideModalComponent implements OnInit {
     }
 
     this.isSubmitting.set(true);
+    this.generalError.set(null);
     const formValue = this.guideForm.value;
 
     const data: any = {
@@ -84,30 +86,40 @@ export class GuideModalComponent implements OnInit {
 
     if (this.isEditMode() && this.guide()) {
       this.guidesService.updateGuide(this.guide()!.id, data).subscribe({
-        next: () => {
+        next: (res: any) => {
           this.isSubmitting.set(false);
-          this.guideSaved.emit();
+          this.guideSaved.emit(res?.guide?.id ?? null);
           this.close();
         },
         error: (err) => {
           console.error('Error actualizando guía', err);
-          if (err.error?.errors?.guide_number) {
-            this.backendError.set(err.error.errors.guide_number[0]);
+          const errors = err.error?.errors;
+          if (errors?.guide_number) {
+            this.backendError.set(errors.guide_number[0]);
+          } else if (errors?.attached_file) {
+            this.fileError.set(errors.attached_file[0]);
+          } else {
+            this.generalError.set(err.error?.mensaje || 'Ocurrió un error al guardar. Inténtalo de nuevo.');
           }
           this.isSubmitting.set(false);
         }
       });
     } else {
       this.guidesService.createGuide(data).subscribe({
-        next: () => {
+        next: (res: any) => {
           this.isSubmitting.set(false);
-          this.guideSaved.emit();
+          this.guideSaved.emit(res?.guide?.id ?? null);
           this.close();
         },
         error: (err) => {
           console.error('Error creando guía', err);
-          if (err.error?.errors?.guide_number) {
-            this.backendError.set(err.error.errors.guide_number[0]);
+          const errors = err.error?.errors;
+          if (errors?.guide_number) {
+            this.backendError.set(errors.guide_number[0]);
+          } else if (errors?.attached_file) {
+            this.fileError.set(errors.attached_file[0]);
+          } else {
+            this.generalError.set(err.error?.mensaje || 'Ocurrió un error al guardar. Inténtalo de nuevo.');
           }
           this.isSubmitting.set(false);
         }

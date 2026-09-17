@@ -14,11 +14,16 @@ export class ProductionsService {
   private readonly http   = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/productions`;
 
-  /** GET /api/productions?search=&per_page= */
-  getProductions(search: string = '', perPage: number = 10): Observable<ProductionListResponse> {
-    const params = new HttpParams()
+  /** GET /api/productions?search=&page=&per_page=&date= */
+  getProductions(search: string = '', page: number = 1, perPage: number = 10, date: string = ''): Observable<ProductionListResponse> {
+    let params = new HttpParams()
       .set('search', search)
+      .set('page', page.toString())
       .set('per_page', perPage.toString());
+      
+    if (date) {
+      params = params.set('date', date);
+    }
     return this.http.get<ProductionListResponse>(this.apiUrl, { params });
   }
 

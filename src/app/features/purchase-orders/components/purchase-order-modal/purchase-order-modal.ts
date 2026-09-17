@@ -23,12 +23,13 @@ export class PurchaseOrderModalComponent implements OnInit {
 
   readonly isEditMode = signal<boolean>(false);
   readonly isSubmitting = signal<boolean>(false);
+  readonly serverError = signal<string | null>(null);
   
   selectedFile: File | null = null;
 
   poForm: FormGroup = this.fb.group({
     order_number: ['', Validators.required],
-    unit_price: [0, [Validators.required, Validators.min(0)]],
+    unit_price: [0, [Validators.min(0)]],
     issue_date: [''],
     is_active: [true]
   });
@@ -58,6 +59,8 @@ export class PurchaseOrderModalComponent implements OnInit {
   }
 
   save() {
+    this.serverError.set(null);
+    
     if (this.poForm.invalid) {
       this.poForm.markAllAsTouched();
       return;
@@ -86,6 +89,11 @@ export class PurchaseOrderModalComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error actualizando orden de compra', err);
+          if (err.error && err.error.errors && err.error.errors.order_number) {
+            this.serverError.set(err.error.errors.order_number[0]);
+          } else if (err.error && err.error.mensaje) {
+            this.serverError.set(err.error.mensaje);
+          }
           this.isSubmitting.set(false);
         }
       });
@@ -98,6 +106,11 @@ export class PurchaseOrderModalComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error creando orden de compra', err);
+          if (err.error && err.error.errors && err.error.errors.order_number) {
+            this.serverError.set(err.error.errors.order_number[0]);
+          } else if (err.error && err.error.mensaje) {
+            this.serverError.set(err.error.mensaje);
+          }
           this.isSubmitting.set(false);
         }
       });

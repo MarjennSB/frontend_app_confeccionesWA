@@ -19,6 +19,9 @@ export class PurchaseOrdersListComponent implements OnInit {
   readonly isModalOpen = signal<boolean>(false);
 
   readonly searchTerm = signal<string>('');
+  readonly currentPage = signal<number>(1);
+  readonly totalPages = signal<number>(1);
+  readonly totalItems = signal<number>(0);
   private searchTimeout: any;
 
   ngOnInit(): void {
@@ -31,17 +34,30 @@ export class PurchaseOrdersListComponent implements OnInit {
       clearTimeout(this.searchTimeout);
     }
     this.searchTimeout = setTimeout(() => {
+      this.currentPage.set(1);
       this.loadPurchaseOrders();
     }, 400); // 400ms debounce
   }
 
   loadPurchaseOrders(): void {
-    this.purchaseOrdersService.getPurchaseOrders(this.searchTerm()).subscribe({
+    this.purchaseOrdersService.getPurchaseOrders(this.searchTerm(), this.currentPage()).subscribe({
       next: (res) => {
         this.purchaseOrders.set(res.purchase_orders.data);
+        if (res.pagination) {
+          this.currentPage.set(res.pagination.current_page);
+          this.totalPages.set(res.pagination.last_page);
+          this.totalItems.set(res.pagination.total);
+        }
       },
       error: (err: any) => console.error('Error cargando órdenes de compra', err)
     });
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadPurchaseOrders();
+    }
   }
 
   openModal(purchaseOrder?: PurchaseOrder): void {
@@ -63,7 +79,7 @@ export class PurchaseOrdersListComponent implements OnInit {
   }
 
   getDownloadUrl(filePath: string): string {
-    // Assuming backend serves storage files publicly at /storage/
-    return `http://127.0.0.1:8000/storage/${filePath}`;
+    // El resource ya devuelve la URL completa
+    return filePath;
   }
 }

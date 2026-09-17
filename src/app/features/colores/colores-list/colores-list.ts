@@ -19,6 +19,9 @@ export class ColoresListComponent implements OnInit {
   readonly isModalOpen = signal<boolean>(false);
 
   readonly searchTerm = signal<string>('');
+  readonly currentPage = signal<number>(1);
+  readonly totalPages = signal<number>(1);
+  readonly totalItems = signal<number>(0);
   private searchTimeout: any;
 
   ngOnInit(): void {
@@ -31,17 +34,30 @@ export class ColoresListComponent implements OnInit {
       clearTimeout(this.searchTimeout);
     }
     this.searchTimeout = setTimeout(() => {
+      this.currentPage.set(1);
       this.loadColors();
     }, 400); // 400ms debounce
   }
 
   loadColors(): void {
-    this.colorsService.getColors(this.searchTerm()).subscribe({
+    this.colorsService.getColors(this.searchTerm(), this.currentPage()).subscribe({
       next: (res) => {
         this.colors.set(res.colores.data);
+        if (res.pagination) {
+          this.currentPage.set(res.pagination.current_page);
+          this.totalPages.set(res.pagination.last_page);
+          this.totalItems.set(res.pagination.total);
+        }
       },
       error: (err: any) => console.error('Error cargando colores', err)
     });
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadColors();
+    }
   }
 
   openModal(color?: Color): void {

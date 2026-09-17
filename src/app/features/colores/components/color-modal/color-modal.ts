@@ -26,7 +26,7 @@ export class ColorModalComponent implements OnInit {
 
   colorForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
-    abbreviation: ['', Validators.required],
+    abbreviation: [''],
     is_active: [true]
   });
 
@@ -36,7 +36,7 @@ export class ColorModalComponent implements OnInit {
       this.isEditMode.set(true);
       this.colorForm.patchValue({
         name: currentColor.name,
-        abbreviation: currentColor.abbreviation,
+        abbreviation: currentColor.abbreviation ?? '',
         is_active: currentColor.is_active,
       });
     } else {

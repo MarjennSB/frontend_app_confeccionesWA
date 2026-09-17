@@ -86,7 +86,8 @@ export class PoSelectorModalComponent {
   }
 
   loadPOs() {
-    this.poService.getPurchaseOrders(this.searchTerm(), 10).subscribe({
+    // Pedir página 1, 10 registros
+    this.poService.getPurchaseOrders(this.searchTerm(), 1, 10).subscribe({
       next: (res) => this.purchaseOrders.set(res.purchase_orders.data),
       error: (err) => console.error('Error', err)
     });

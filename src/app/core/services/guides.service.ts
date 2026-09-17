@@ -14,11 +14,15 @@ export class GuidesService {
   private readonly http   = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/guides`;
 
-  /** GET /api/guides?search=&per_page= */
-  getGuides(search: string = '', perPage: number = 10): Observable<GuideListResponse> {
-    const params = new HttpParams()
+  /** GET /api/guides?search=&per_page=&available= */
+  getGuides(search: string = '', page: number = 1, perPage: number = 10, available?: boolean): Observable<GuideListResponse> {
+    let params = new HttpParams()
       .set('search', search)
+      .set('page', page.toString())
       .set('per_page', perPage.toString());
+    if (available !== undefined) {
+      params = params.set('available', available ? '1' : '0');
+    }
     return this.http.get<GuideListResponse>(this.apiUrl, { params });
   }
 

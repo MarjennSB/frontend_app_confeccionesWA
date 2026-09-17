@@ -1,27 +1,36 @@
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
     <h2 class="h4 mb-0 text-gray-800">Lista de Produccion</h2>
-    <div class="d-flex gap-3">
-      <div class="input-group shadow-sm" style="width: 280px;">
-        <span class="input-group-text bg-white border-end-0"><i class="ri-search-line text-muted"></i></span>
-        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número O/P..."
+    <div class="d-flex gap-2 align-items-center">
+      <div class="input-group shadow-sm d-print-none" style="width: 200px;">
+        <span class="input-group-text border-end-0"><i class="ri-calendar-line text-muted"></i></span>
+        <input type="date" class="form-control border-start-0 ps-0" [ngModel]="filterDate()"
+          (ngModelChange)="onDateChange($event)">
+      </div>
+      <div class="input-group shadow-sm d-print-none" style="width: 250px;">
+        <span class="input-group-text border-end-0"><i class="ri-search-line text-muted"></i></span>
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar O/P u O/C..."
           [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
       </div>
-      <button class="btn btn-primary shadow-sm text-nowrap" (click)="openModal()">
+      <button class="btn btn-secondary shadow-sm text-nowrap d-print-none" (click)="printReport()"
+        title="Imprimir Reporte">
+        <i class="ri-printer-line me-1"></i> Imprimir
+      </button>
+      <button class="btn btn-primary shadow-sm text-nowrap d-print-none" (click)="openModal()">
         <i class="ri-add-line me-1"></i> Nueva Producción
       </button>
     </div>
   </div>
 
-  <div class="card shadow-sm border-0">
+  <div class="card shadow-sm border-0 d-print-none">
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th class="ps-4">ID</th>
-              <th>Nro. O/P</th>
               <th>Nro. O/C</th>
+              <th>Nro. O/P</th>
               <th>Cantidad</th>
               <th>P. Unitario</th>
               <th>Colores</th>
@@ -34,26 +43,37 @@
             @for (prod of productions(); track prod.id) {
             <tr>
               <td class="ps-4 fw-medium">{{ prod.id }}</td>
-              <td><span class="badge bg-dark px-2 py-1 shadow-sm rounded-1">{{ prod.production_order_number }}</span>
-              </td>
-              <td><span class="badge bg-secondary px-2 py-1 shadow-sm rounded-1">{{ prod.purchase_order_number }}</span>
-              </td>
+              <td><span class="badge fs-6 px-2 py-1 shadow-sm rounded-1" style="background:#0891b2;">{{
+                  prod.purchase_order_number }}</span></td>
+              <td><span class="badge fs-6 px-2 py-1 shadow-sm rounded-1" style="background:#4f46e5;">{{
+                  prod.production_order_number }}</span></td>
               <td>{{ prod.quantity }}</td>
               <td class="fw-bold text-success">${{ prod.unit_price | number:'1.2-2' }}</td>
+
+              <!-- Colores -->
               <td>
                 @if (prod.colors?.length) {
-                <span class="badge bg-dark px-2 py-1 shadow-sm rounded-1">{{ prod.colors?.length }} color(es)</span>
+                <button class="btn btn-sm btn-primary px-2 py-1 shadow-sm rounded-1" title="Ver colores"
+                  (click)="openDetailModal(prod, 'colors')">
+                  <i class="ri-palette-line me-1"></i>{{ prod.colors?.length }} color(es)
+                </button>
                 } @else {
                 <span class="text-muted small">-</span>
                 }
               </td>
+
+              <!-- Guías -->
               <td>
                 @if (prod.guides?.length) {
-                <span class="badge bg-secondary px-2 py-1 shadow-sm rounded-1">{{ prod.guides?.length }} guía(s)</span>
+                <button class="btn btn-sm btn-secondary px-2 py-1 shadow-sm rounded-1" title="Ver guías"
+                  (click)="openDetailModal(prod, 'guides')">
+                  <i class="ri-file-list-3-line me-1"></i>{{ prod.guides?.length }} guía(s)
+                </button>
                 } @else {
                 <span class="text-muted small">-</span>
                 }
               </td>
+
               <td>
                 @if (prod.is_active) {
                 <span class="badge bg-success px-2 py-1 shadow-sm rounded-1">Activo</span>
@@ -83,12 +103,141 @@
         </table>
       </div>
     </div>
+
+    @if (totalPages() > 1 || totalItems() > 0) {
+    <div class="card-footer border-top d-flex justify-content-between align-items-center py-3">
+      <p class="mb-0 text-muted small">
+        Página {{ currentPage() }} de {{ totalPages() }} ({{ totalItems() }} registros)
+      </p>
+      <ul class="pagination pagination-sm mb-0 shadow-sm">
+        <li class="page-item" [class.disabled]="currentPage() === 1">
+          <button class="page-link" (click)="changePage(currentPage() - 1)">Anterior</button>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+          <button class="page-link" (click)="changePage(currentPage() + 1)">Siguiente</button>
+        </li>
+      </ul>
+    </div>
+    }
   </div>
 </div>
 
-<!-- Modal will be rendered if open -->
+<!-- Modal editar/crear producción -->
 @if (isModalOpen()) {
 <app-production-modal [isOpen]="isModalOpen()" [production]="selectedProduction()" (closeModal)="closeModal()"
   (productionSaved)="loadProductions()">
 </app-production-modal>
 }
+
+<!-- ══ Modal de detalle: Colores ══ -->
+@if (detailModalType() === 'colors' && detailModalProduction()) {
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.45);">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white py-3">
+        <h6 class="modal-title fw-bold mb-0">
+          <i class="ri-palette-line me-2"></i>Colores — O/P {{ detailModalProduction()?.production_order_number }}
+        </h6>
+        <button type="button" class="btn-close btn-close-white" (click)="closeDetailModal()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <ul class="list-group list-group-flush">
+          @for (color of detailModalProduction()!.colors; track color.id) {
+          <li class="list-group-item d-flex align-items-center py-2 px-3">
+            <span class="badge bg-primary rounded-circle me-2" style="width:10px;height:10px;padding:0;">&nbsp;</span>
+            <span class="fw-medium">{{ color.name }}</span>
+          </li>
+          }
+          @if (!detailModalProduction()!.colors?.length) {
+          <li class="list-group-item text-muted text-center py-3">Sin colores registrados.</li>
+          }
+        </ul>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-sm btn-secondary" (click)="closeDetailModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ══ Modal de detalle: Guías ══ -->
+@if (detailModalType() === 'guides' && detailModalProduction()) {
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.45);">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-secondary text-white py-3">
+        <h6 class="modal-title fw-bold mb-0">
+          <i class="ri-file-list-3-line me-2"></i>Guías — O/P {{ detailModalProduction()?.production_order_number }}
+        </h6>
+        <button type="button" class="btn-close btn-close-white" (click)="closeDetailModal()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <ul class="list-group list-group-flush">
+          @for (guide of detailModalProduction()!.guides; track guide.id) {
+          <li class="list-group-item d-flex align-items-center py-2 px-3">
+            <i class="ri-file-text-line text-secondary me-2"></i>
+            <span class="fw-medium">{{ guide.guide_number }}</span>
+            @if (guide.issue_date) {
+            <span class="text-muted ms-auto small">{{ guide.issue_date | date:'dd/MM/yyyy' }}</span>
+            }
+          </li>
+          }
+          @if (!detailModalProduction()!.guides?.length) {
+          <li class="list-group-item text-muted text-center py-3">Sin guías registradas.</li>
+          }
+        </ul>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-sm btn-secondary" (click)="closeDetailModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- VISTA DE IMPRESIÓN (Oculta normalmente, visible al imprimir) -->
+<div class="d-none d-print-block print-wrapper">
+
+  <h2 class="print-report-title">HOJA DE RESUMEN</h2>
+
+  <!-- Tabla de Datos -->
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th class="col-num">#</th>
+        <th class="col-qty">CANTIDAD</th>
+        <th class="col-op">Nro. O/P</th>
+        <th class="col-oc">Nro. O/C</th>
+        <th class="col-color">COLOR</th>
+        <th class="col-pv">P.U</th>
+        <th class="col-guides">GUÍAS</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (prod of productions(); track prod.id; let i = $index) {
+      <tr>
+        <td class="text-center">{{ i + 1 }}</td>
+        <td class="text-center fw-bold">{{ prod.quantity }}</td>
+        <td>{{ prod.production_order_number }}</td>
+        <td>{{ prod.purchase_order_number }}</td>
+        <td>
+          @for (c of prod.colors; track c.id; let last = $last) {
+          {{ c.name }}{{ !last ? ', ' : '' }}
+          }
+        </td>
+        <td class="text-center">
+          @if (prod.unit_price) { {{ prod.unit_price | number:'1.2-2' }} }
+          @else { — }
+        </td>
+        <td>
+          @for (g of prod.guides; track g.id; let last = $last) {
+          {{ g.guide_number }}{{ !last ? ', ' : '' }}
+          }
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+</div>

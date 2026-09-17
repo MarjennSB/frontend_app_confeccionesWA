@@ -6,7 +6,7 @@
 export interface Color {
   id: number | string;
   name: string;
-  abbreviation: string;
+  abbreviation?: string;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -26,12 +26,12 @@ export interface ColorListResponse {
 
 export interface CreateColorDto {
   name: string;
-  abbreviation: string;
+  abbreviation?: string;
   is_active: boolean;
 }
 
 export interface UpdateColorDto {
   name: string;
-  abbreviation: string;
+  abbreviation?: string;
   is_active: boolean;
 }

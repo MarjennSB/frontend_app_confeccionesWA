@@ -19,6 +19,9 @@ export class GuidesListComponent implements OnInit {
   readonly isModalOpen = signal<boolean>(false);
   
   readonly searchTerm = signal<string>('');
+  readonly currentPage = signal<number>(1);
+  readonly totalPages = signal<number>(1);
+  readonly totalItems = signal<number>(0);
   private searchTimeout: any;
 
   ngOnInit(): void {
@@ -31,17 +34,30 @@ export class GuidesListComponent implements OnInit {
       clearTimeout(this.searchTimeout);
     }
     this.searchTimeout = setTimeout(() => {
+      this.currentPage.set(1);
       this.loadGuides();
     }, 400);
   }
 
   loadGuides(): void {
-    this.guidesService.getGuides(this.searchTerm()).subscribe({
+    this.guidesService.getGuides(this.searchTerm(), this.currentPage()).subscribe({
       next: (res) => {
         this.guides.set(res.guides.data);
+        if (res.pagination) {
+          this.currentPage.set(res.pagination.current_page);
+          this.totalPages.set(res.pagination.last_page);
+          this.totalItems.set(res.pagination.total);
+        }
       },
       error: (err: any) => console.error('Error cargando guías', err)
     });
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadGuides();
+    }
   }
 
   openModal(guide?: Guide): void {
@@ -63,6 +79,7 @@ export class GuidesListComponent implements OnInit {
   }
 
   getDownloadUrl(filePath: string): string {
-    return `http://127.0.0.1:8000/storage/${filePath}`;
+    // El resource ya devuelve la URL completa
+    return filePath;
   }
 }

@@ -19,6 +19,10 @@ export class InvoicesListComponent implements OnInit {
   readonly isModalOpen = signal<boolean>(false);
   
   readonly searchTerm = signal<string>('');
+  readonly filterDate = signal<string>('');
+  readonly currentPage = signal<number>(1);
+  readonly totalPages = signal<number>(1);
+  readonly totalItems = signal<number>(0);
   private searchTimeout: any;
 
   ngOnInit(): void {
@@ -31,17 +35,40 @@ export class InvoicesListComponent implements OnInit {
       clearTimeout(this.searchTimeout);
     }
     this.searchTimeout = setTimeout(() => {
+      this.currentPage.set(1);
       this.loadInvoices();
     }, 400);
   }
 
+  onDateChange(dateStr: string): void {
+    this.filterDate.set(dateStr);
+    this.currentPage.set(1);
+    this.loadInvoices();
+  }
+
+  printReport(): void {
+    window.print();
+  }
+
   loadInvoices(): void {
-    this.invoicesService.getInvoices(this.searchTerm()).subscribe({
+    this.invoicesService.getInvoices(this.searchTerm(), this.filterDate(), this.currentPage()).subscribe({
       next: (res) => {
         this.invoices.set(res.invoices.data);
+        if (res.pagination) {
+          this.currentPage.set(res.pagination.current_page);
+          this.totalPages.set(res.pagination.last_page);
+          this.totalItems.set(res.pagination.total);
+        }
       },
       error: (err: any) => console.error('Error cargando facturas', err)
     });
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadInvoices();
+    }
   }
 
   openModal(invoice?: Invoice): void {
@@ -63,6 +90,7 @@ export class InvoicesListComponent implements OnInit {
   }
 
   getDownloadUrl(filePath: string): string {
-    return `http://127.0.0.1:8000/storage/${filePath}`;
+    // El resource ya devuelve la URL completa
+    return filePath;
   }
 }

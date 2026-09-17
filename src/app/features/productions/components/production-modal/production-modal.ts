@@ -128,8 +128,14 @@ export class ProductionModalComponent implements OnInit {
     this.isCreateColorOpen.set(true);
   }
 
-  onColorCreated() {
-    // Cuando se crea, vuelve a abrir el selector
+  onColorCreated(newColorId?: number | null) {
+    if (newColorId) {
+      const currentColors: number[] = this.prodForm.get('colors')?.value || [];
+      if (!currentColors.includes(newColorId)) {
+        this.prodForm.get('colors')?.setValue([...currentColors, newColorId]);
+      }
+    }
+    this.isCreateColorOpen.set(false);
     this.isColorSelectorOpen.set(true);
   }
 
@@ -138,9 +144,15 @@ export class ProductionModalComponent implements OnInit {
     this.isCreateGuideOpen.set(true);
   }
 
-  onGuideCreated() {
-    // Idealmente, se seleccionaría automáticamente, pero por ahora solo
-    // reabrimos el gestor para que el usuario la vea y la seleccione/vea allí.
+  onGuideCreated(newGuideId?: number | null) {
+    // Añadir automáticamente la guia creada al formulario y reabrir el manager
+    if (newGuideId) {
+      const currentGuides: number[] = this.prodForm.get('guides')?.value || [];
+      if (!currentGuides.includes(newGuideId)) {
+        this.prodForm.get('guides')?.setValue([...currentGuides, newGuideId]);
+      }
+    }
+    this.isCreateGuideOpen.set(false);
     this.isGuideManagerOpen.set(true);
   }
 
@@ -175,8 +187,8 @@ export class ProductionModalComponent implements OnInit {
     }
     
     const currentGuides = this.prodForm.get('guides')?.value || [];
-    if (currentGuides.length > 9) {
-      alert('Solo se permite un máximo de 9 guías por producción.');
+    if (currentGuides.length > 10) {
+      alert('Solo se permite un máximo de 10 guías por producción.');
       return;
     }
     

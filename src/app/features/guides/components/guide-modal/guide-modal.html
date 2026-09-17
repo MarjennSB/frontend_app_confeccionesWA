@@ -1,6 +1,10 @@
+<!-- Backdrop -->
+@if (isOpen()) {
+  <div class="modal-backdrop fade show" [style.z-index]="zIndex() - 5"></div>
+}
 <div class="modal fade" [class.show]="isOpen()" [style.display]="isOpen() ? 'block' : 'none'" [style.z-index]="zIndex()" tabindex="-1" role="dialog" [attr.aria-hidden]="!isOpen() ? 'true' : null">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
+    <div class="modal-content border-0 shadow" style="pointer-events: auto;">
       <div class="modal-header bg-light border-bottom-0">
         <h5 class="modal-title fw-bold text-gray-800">
           {{ isEditMode() ? 'Editar Guía de Remisión' : 'Nueva Guía de Remisión' }}
@@ -9,6 +13,11 @@
       </div>
       <div class="modal-body p-4">
         <form [formGroup]="guideForm" (ngSubmit)="save()">
+          @if (generalError()) {
+            <div class="alert alert-danger py-2 px-3 mb-3 small">
+              <i class="ri-error-warning-line me-1"></i> {{ generalError() }}
+            </div>
+          }
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-medium">Número de Guía <span class="text-danger">*</span></label>
@@ -57,7 +66,3 @@
     </div>
   </div>
 </div>
-<!-- Backdrop -->
-@if (isOpen()) {
-  <div class="modal-backdrop fade show" [style.z-index]="zIndex() - 5"></div>
-}

@@ -1,18 +1,26 @@
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
     <h2 class="h4 mb-0 text-gray-800">Facturación</h2>
-    <div class="d-flex gap-3">
-      <div class="input-group shadow-sm" style="width: 280px;">
-        <span class="input-group-text bg-white border-end-0"><i class="ri-search-line text-muted"></i></span>
+    <div class="d-flex gap-2 align-items-center">
+      <div class="input-group shadow-sm d-print-none" style="width: 200px;">
+        <span class="input-group-text border-end-0"><i class="ri-calendar-line text-muted"></i></span>
+        <input type="date" class="form-control border-start-0 ps-0" [ngModel]="filterDate()"
+          (ngModelChange)="onDateChange($event)" title="Filtrar por fecha">
+      </div>
+      <div class="input-group shadow-sm d-print-none" style="width: 280px;">
+        <span class="input-group-text border-end-0"><i class="ri-search-line text-muted"></i></span>
         <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número..." [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
       </div>
-      <button class="btn btn-primary shadow-sm text-nowrap" (click)="openModal()">
+      <button class="btn btn-secondary shadow-sm text-nowrap d-print-none" (click)="printReport()" title="Imprimir Reporte">
+        <i class="ri-printer-line me-1"></i> Imprimir
+      </button>
+      <button class="btn btn-primary shadow-sm text-nowrap d-print-none" (click)="openModal()">
         <i class="ri-add-line me-1"></i> Nueva Factura
       </button>
     </div>
   </div>
 
-  <div class="card shadow-sm border-0">
+  <div class="card shadow-sm border-0 d-print-none">
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -33,7 +41,7 @@
               <tr>
                 <td class="ps-4 fw-medium">{{ invoice.id }}</td>
                 <td><span class="badge bg-dark px-2 py-1 shadow-sm rounded-1">{{ invoice.invoice_number }}</span></td>
-                <td>{{ invoice.issue_date || 'N/A' }}</td>
+                <td>{{ invoice.issue_date ? (invoice.issue_date | date:'dd/MM/yyyy') : 'N/A' }}</td>
                 <td class="fw-bold">{{ invoice.currency }} {{ invoice.total_amount | number:'1.2-2' }}</td>
                 <td>
                   @if (invoice.payment_status === 'PAGADA') {
@@ -80,6 +88,22 @@
         </table>
       </div>
     </div>
+
+    @if (totalPages() > 1 || totalItems() > 0) {
+    <div class="card-footer border-top d-flex justify-content-between align-items-center py-3">
+      <p class="mb-0 text-muted small">
+        Página {{ currentPage() }} de {{ totalPages() }} ({{ totalItems() }} registros)
+      </p>
+      <ul class="pagination pagination-sm mb-0 shadow-sm">
+        <li class="page-item" [class.disabled]="currentPage() === 1">
+          <button class="page-link text-dark" (click)="changePage(currentPage() - 1)">Anterior</button>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+          <button class="page-link text-dark" (click)="changePage(currentPage() + 1)">Siguiente</button>
+        </li>
+      </ul>
+    </div>
+    }
   </div>
 </div>
 
@@ -92,3 +116,27 @@
     (invoiceSaved)="loadInvoices()">
   </app-invoice-modal>
 }
+
+<!-- VISTA DE IMPRESIÓN (Oculta normalmente, visible al imprimir) -->
+<div class="d-none d-print-block print-wrapper mt-4">
+  <div class="text-center mb-4 pb-3 border-bottom">
+    <h2 class="fw-bold mb-1">Reporte de Facturas</h2>
+    @if (filterDate()) {
+      <p class="text-muted mb-0 fs-5">Fecha: {{ filterDate() | date:'dd/MM/yyyy' }}</p>
+    } @else {
+      <p class="text-muted mb-0 fs-5">Todas las fechas</p>
+    }
+  </div>
+  
+  <div class="d-flex flex-column gap-2 text-start ms-4">
+    @for (invoice of invoices(); track invoice.id; let i = $index) {
+      <div class="fw-bold fs-5">
+        {{ i + 1 }}. {{ invoice.invoice_number }}
+      </div>
+    } @empty {
+      <div class="text-center text-muted mt-5 w-100">
+        <h4>No se encontraron facturas para esta fecha.</h4>
+      </div>
+    }
+  </div>
+</div>

@@ -11,9 +11,10 @@ export class UsersService {
   private readonly apiUrl = `${environment.apiUrl}/usuarios`;
 
   /** GET /api/usuarios?search=&per_page= */
-  getUsers(search: string = '', perPage: number = 10): Observable<UserListResponse> {
+  getUsers(search: string = '', page: number = 1, perPage: number = 10): Observable<UserListResponse> {
     const params = new HttpParams()
       .set('search', search)
+      .set('page', page.toString())
       .set('per_page', perPage.toString());
     return this.http.get<UserListResponse>(this.apiUrl, { params });
   }

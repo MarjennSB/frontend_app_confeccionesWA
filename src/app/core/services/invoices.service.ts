@@ -14,10 +14,12 @@ export class InvoicesService {
   private readonly http   = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/invoices`;
 
-  /** GET /api/invoices?search=&per_page= */
-  getInvoices(search: string = '', perPage: number = 10): Observable<InvoiceListResponse> {
+  /** GET /api/invoices?search=&date=&per_page= */
+  getInvoices(search: string = '', date: string = '', page: number = 1, perPage: number = 10): Observable<InvoiceListResponse> {
     const params = new HttpParams()
       .set('search', search)
+      .set('date', date)
+      .set('page', page.toString())
       .set('per_page', perPage.toString());
     return this.http.get<InvoiceListResponse>(this.apiUrl, { params });
   }
@@ -46,7 +48,11 @@ export class InvoicesService {
       if (key === 'attached_file' && val instanceof File) {
         fd.append('attached_file', val, val.name);
       } else if ((key as string) !== '_method') {
-        fd.append(key, String(val));
+        if (typeof val === 'boolean') {
+          fd.append(key, val ? '1' : '0');
+        } else {
+          fd.append(key, String(val));
+        }
       }
     });
     return fd;

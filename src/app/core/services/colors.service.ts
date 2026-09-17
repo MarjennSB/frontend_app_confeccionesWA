@@ -15,9 +15,10 @@ export class ColorsService {
   private readonly apiUrl = `${environment.apiUrl}/colores`;
 
   /** GET /api/colores?search=&per_page= */
-  getColors(search: string = '', perPage: number = 10): Observable<ColorListResponse> {
+  getColors(search: string = '', page: number = 1, perPage: number = 10): Observable<ColorListResponse> {
     const params = new HttpParams()
       .set('search', search)
+      .set('page', page.toString())
       .set('per_page', perPage.toString());
     return this.http.get<ColorListResponse>(this.apiUrl, { params });
   }

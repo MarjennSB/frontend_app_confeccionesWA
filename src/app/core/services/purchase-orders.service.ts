@@ -15,9 +15,10 @@ export class PurchaseOrdersService {
   private readonly apiUrl = `${environment.apiUrl}/purchase-orders`;
 
   /** GET /api/purchase-orders?search=&per_page= */
-  getPurchaseOrders(search: string = '', perPage: number = 10): Observable<PurchaseOrderListResponse> {
+  getPurchaseOrders(search: string = '', page: number = 1, perPage: number = 10): Observable<PurchaseOrderListResponse> {
     const params = new HttpParams()
       .set('search', search)
+      .set('page', page.toString())
       .set('per_page', perPage.toString());
     return this.http.get<PurchaseOrderListResponse>(this.apiUrl, { params });
   }
