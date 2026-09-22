@@ -19,6 +19,7 @@ export class GuidesListComponent implements OnInit {
   readonly isModalOpen = signal<boolean>(false);
   
   readonly searchTerm = signal<string>('');
+  readonly searchDate = signal<string>('');
   readonly currentPage = signal<number>(1);
   readonly totalPages = signal<number>(1);
   readonly totalItems = signal<number>(0);
@@ -39,8 +40,14 @@ export class GuidesListComponent implements OnInit {
     }, 400);
   }
 
+  onSearchDateChange(date: string): void {
+    this.searchDate.set(date);
+    this.currentPage.set(1);
+    this.loadGuides();
+  }
+
   loadGuides(): void {
-    this.guidesService.getGuides(this.searchTerm(), this.currentPage()).subscribe({
+    this.guidesService.getGuides(this.searchTerm(), this.currentPage(), 10, undefined, this.searchDate()).subscribe({
       next: (res) => {
         this.guides.set(res.guides.data);
         if (res.pagination) {

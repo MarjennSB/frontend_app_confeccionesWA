@@ -23,6 +23,8 @@ export class ColorModalComponent implements OnInit {
 
   readonly isEditMode = signal<boolean>(false);
   readonly isSubmitting = signal<boolean>(false);
+  readonly backendError = signal<string | null>(null);
+  readonly generalError = signal<string | null>(null);
 
   colorForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
@@ -52,6 +54,8 @@ export class ColorModalComponent implements OnInit {
     }
     
     this.isSubmitting.set(true);
+    this.backendError.set(null);
+    this.generalError.set(null);
     const formValue = this.colorForm.value;
 
     if (this.isEditMode() && this.color()) {
@@ -64,6 +68,12 @@ export class ColorModalComponent implements OnInit {
         error: (err) => {
           console.error('Error actualizando color', err);
           this.isSubmitting.set(false);
+          if (err.error?.errors) {
+            const firstError = Object.values(err.error.errors)[0] as string[];
+            this.backendError.set(firstError[0]);
+          } else {
+            this.generalError.set(err.error?.mensaje || 'Error al guardar el color');
+          }
         }
       });
     } else {
@@ -76,6 +86,12 @@ export class ColorModalComponent implements OnInit {
         error: (err) => {
           console.error('Error creando color', err);
           this.isSubmitting.set(false);
+          if (err.error?.errors) {
+            const firstError = Object.values(err.error.errors)[0] as string[];
+            this.backendError.set(firstError[0]);
+          } else {
+            this.generalError.set(err.error?.mensaje || 'Error al guardar el color');
+          }
         }
       });
     }

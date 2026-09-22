@@ -29,6 +29,8 @@ export class ProductionsListComponent implements OnInit {
   readonly detailModalType = signal<'colors' | 'guides' | null>(null);
   readonly detailModalProduction = signal<Production | null>(null);
 
+  readonly showPrintWarning = signal<boolean>(false);
+
   private searchTimeout: any;
 
   ngOnInit(): void {
@@ -73,7 +75,15 @@ export class ProductionsListComponent implements OnInit {
   }
 
   printReport(): void {
+    if (!this.filterDate()) {
+      this.showPrintWarning.set(true);
+      return;
+    }
     window.print();
+  }
+
+  closePrintWarning(): void {
+    this.showPrintWarning.set(false);
   }
 
   changePage(page: number): void {

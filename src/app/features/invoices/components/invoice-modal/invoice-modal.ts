@@ -54,8 +54,8 @@ export class InvoiceModalComponent implements OnInit {
         production_id: currentInvoice.production_id,
         total_amount: currentInvoice.total_amount,
         currency: currentInvoice.currency,
-        issue_date: currentInvoice.issue_date,
-        due_date: currentInvoice.due_date,
+        issue_date: currentInvoice.issue_date ? currentInvoice.issue_date.toString().substring(0, 10) : '',
+        due_date: currentInvoice.due_date ? currentInvoice.due_date.toString().substring(0, 10) : '',
         payment_status: currentInvoice.payment_status,
         is_active: currentInvoice.is_active,
       });
@@ -85,7 +85,25 @@ export class InvoiceModalComponent implements OnInit {
 
   onProdSelected(prod: Production): void {
     this.selectedProdDisplay.set(prod.production_order_number);
-    this.invoiceForm.patchValue({ production_id: prod.id });
+    
+    // Asegurarnos de que vengan como números
+    const qty = parseFloat(prod.quantity as any) || 0;
+    const price = parseFloat(prod.unit_price as any) || 0;
+    
+    // Cálculo de Subtotal e IGV
+    const subtotal = qty * price;
+    const igv = subtotal * 0.18;
+    const totalCalculado = subtotal + igv;
+    
+    // Redondear a 2 decimales exactos
+    const totalRedondeado = parseFloat(totalCalculado.toFixed(2));
+    
+    console.log(`Producción seleccionada: Qty=${qty}, Price=${price} -> Subtotal=${subtotal}, IGV=${igv}, Total=${totalRedondeado}`);
+
+    this.invoiceForm.patchValue({ 
+      production_id: prod.id,
+      total_amount: totalRedondeado
+    });
   }
 
   clearProdSelection(): void {

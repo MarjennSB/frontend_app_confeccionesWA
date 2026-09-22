@@ -65,10 +65,7 @@ export class GuideModalComponent implements OnInit {
       return;
     }
 
-    if (!this.isEditMode() && !this.selectedFile) {
-      this.fileError.set('Debe adjuntar un archivo (PDF/Imagen) para crear la guía.');
-      return;
-    }
+    // Removed mandatory file requirement as requested
 
     this.isSubmitting.set(true);
     this.generalError.set(null);

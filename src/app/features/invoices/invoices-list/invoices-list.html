@@ -9,9 +9,11 @@
       </div>
       <div class="input-group shadow-sm d-print-none" style="width: 280px;">
         <span class="input-group-text border-end-0"><i class="ri-search-line text-muted"></i></span>
-        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número..." [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número..."
+          [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
       </div>
-      <button class="btn btn-secondary shadow-sm text-nowrap d-print-none" (click)="printReport()" title="Imprimir Reporte">
+      <button class="btn btn-secondary shadow-sm text-nowrap d-print-none" (click)="printReport()"
+        title="Imprimir Reporte">
         <i class="ri-printer-line me-1"></i> Imprimir
       </button>
       <button class="btn btn-primary shadow-sm text-nowrap d-print-none" (click)="openModal()">
@@ -38,51 +40,55 @@
           </thead>
           <tbody>
             @for (invoice of invoices(); track invoice.id) {
-              <tr>
-                <td class="ps-4 fw-medium">{{ invoice.id }}</td>
-                <td><span class="badge bg-dark px-2 py-1 shadow-sm rounded-1">{{ invoice.invoice_number }}</span></td>
-                <td>{{ invoice.issue_date ? (invoice.issue_date | date:'dd/MM/yyyy') : 'N/A' }}</td>
-                <td class="fw-bold">{{ invoice.currency }} {{ invoice.total_amount | number:'1.2-2' }}</td>
-                <td>
-                  @if (invoice.payment_status === 'PAGADA') {
-                    <span class="badge bg-success px-2 py-1 shadow-sm rounded-1">Pagada</span>
-                  } @else if (invoice.payment_status === 'ANULADA') {
-                    <span class="badge bg-danger px-2 py-1 shadow-sm rounded-1">Anulada</span>
-                  } @else {
-                    <span class="badge bg-warning text-dark px-2 py-1 shadow-sm rounded-1">Pendiente</span>
-                  }
-                </td>
-                <td>
-                  @if (invoice.attached_file) {
-                    <a [href]="getDownloadUrl(invoice.attached_file)" target="_blank" class="btn btn-sm btn-outline-info shadow-sm px-2 py-1" title="Ver Archivo">
-                      <i class="ri-file-download-line"></i> Descargar
-                    </a>
-                  } @else {
-                    <span class="text-muted"><i class="ri-file-forbid-line"></i> Sin archivo</span>
-                  }
-                </td>
-                <td>
-                  @if (invoice.is_active) {
-                    <span class="badge bg-success px-2 py-1 shadow-sm rounded-1">Activo</span>
-                  } @else {
-                    <span class="badge bg-danger px-2 py-1 shadow-sm rounded-1">Inactivo</span>
-                  }
-                </td>
-                <td class="text-end pe-4 text-nowrap">
-                  <button class="btn btn-sm btn-outline-dark shadow-sm me-2 px-2 py-1" (click)="openModal(invoice)" title="Editar">
-                    <i class="ri-pencil-line"></i> Editar
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger shadow-sm px-2 py-1" (click)="deleteInvoice(invoice.id)" title="Eliminar">
-                    <i class="ri-delete-bin-line"></i> Eliminar
-                  </button>
-                </td>
-              </tr>
+            <tr>
+              <td class="ps-4 fw-medium">{{ invoice.id }}</td>
+              <td><span class="badge fs-6 px-2 py-1 shadow-sm rounded-1" style="background:#0891b2;">{{
+                  invoice.invoice_number }}</span></td>
+              <td>{{ invoice.issue_date ? (invoice.issue_date | date:'dd/MM/yyyy':'UTC') : 'N/A' }}</td>
+              <td class="fw-bold">{{ invoice.currency }} {{ invoice.total_amount | number:'1.2-2' }}</td>
+              <td>
+                @if (invoice.payment_status === 'PAGADA') {
+                <span class="badge bg-success px-2 py-1 shadow-sm rounded-1">Pagada</span>
+                } @else if (invoice.payment_status === 'ANULADA') {
+                <span class="badge bg-danger px-2 py-1 shadow-sm rounded-1">Anulada</span>
+                } @else {
+                <span class="badge bg-warning text-dark px-2 py-1 shadow-sm rounded-1">Pendiente</span>
+                }
+              </td>
+              <td>
+                @if (invoice.attached_file) {
+                <a [href]="getDownloadUrl(invoice.attached_file)" target="_blank"
+                  class="btn btn-sm btn-outline-info shadow-sm px-2 py-1" title="Ver Archivo">
+                  <i class="ri-file-download-line"></i> Descargar
+                </a>
+                } @else {
+                <span class="text-muted"><i class="ri-file-forbid-line"></i> Sin archivo</span>
+                }
+              </td>
+              <td>
+                @if (invoice.is_active) {
+                <span class="badge bg-success px-2 py-1 shadow-sm rounded-1">Activo</span>
+                } @else {
+                <span class="badge bg-danger px-2 py-1 shadow-sm rounded-1">Inactivo</span>
+                }
+              </td>
+              <td class="text-end pe-4 text-nowrap">
+                <button class="btn btn-sm btn-outline-dark shadow-sm me-2 px-2 py-1" (click)="openModal(invoice)"
+                  title="Editar">
+                  <i class="ri-pencil-line"></i> Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger shadow-sm px-2 py-1" (click)="deleteInvoice(invoice.id)"
+                  title="Eliminar">
+                  <i class="ri-delete-bin-line"></i> Eliminar
+                </button>
+              </td>
+            </tr>
             } @empty {
-              <tr>
-                <td colspan="8" class="text-center py-4 text-muted">
-                  No hay facturas registradas.
-                </td>
-              </tr>
+            <tr>
+              <td colspan="8" class="text-center py-4 text-muted">
+                No hay facturas registradas.
+              </td>
+            </tr>
             }
           </tbody>
         </table>
@@ -109,12 +115,9 @@
 
 <!-- Modal -->
 @if (isModalOpen()) {
-  <app-invoice-modal 
-    [isOpen]="isModalOpen()" 
-    [invoice]="selectedInvoice()" 
-    (closeModal)="closeModal()" 
-    (invoiceSaved)="loadInvoices()">
-  </app-invoice-modal>
+<app-invoice-modal [isOpen]="isModalOpen()" [invoice]="selectedInvoice()" (closeModal)="closeModal()"
+  (invoiceSaved)="loadInvoices()">
+</app-invoice-modal>
 }
 
 <!-- VISTA DE IMPRESIÓN (Oculta normalmente, visible al imprimir) -->
@@ -122,21 +125,21 @@
   <div class="text-center mb-4 pb-3 border-bottom">
     <h2 class="fw-bold mb-1">Reporte de Facturas</h2>
     @if (filterDate()) {
-      <p class="text-muted mb-0 fs-5">Fecha: {{ filterDate() | date:'dd/MM/yyyy' }}</p>
+    <p class="text-muted mb-0 fs-5">Fecha: {{ filterDate() | date:'dd/MM/yyyy':'UTC' }}</p>
     } @else {
-      <p class="text-muted mb-0 fs-5">Todas las fechas</p>
+    <p class="text-muted mb-0 fs-5">Todas las fechas</p>
     }
   </div>
-  
+
   <div class="d-flex flex-column gap-2 text-start ms-4">
     @for (invoice of invoices(); track invoice.id; let i = $index) {
-      <div class="fw-bold fs-5">
-        {{ i + 1 }}. {{ invoice.invoice_number }}
-      </div>
+    <div class="fw-bold fs-5">
+      {{ i + 1 }}. {{ invoice.invoice_number }}
+    </div>
     } @empty {
-      <div class="text-center text-muted mt-5 w-100">
-        <h4>No se encontraron facturas para esta fecha.</h4>
-      </div>
+    <div class="text-center text-muted mt-5 w-100">
+      <h4>No se encontraron facturas para esta fecha.</h4>
+    </div>
     }
   </div>
 </div>

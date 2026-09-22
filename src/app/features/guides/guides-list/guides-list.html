@@ -7,6 +7,11 @@
         <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número..."
           [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
       </div>
+      <div class="input-group shadow-sm" style="width: 200px;">
+        <span class="input-group-text bg-white border-end-0"><i class="ri-calendar-line text-muted"></i></span>
+        <input type="date" class="form-control border-start-0 ps-0 text-muted" title="Filtrar por Fecha de Emisión"
+          [ngModel]="searchDate()" (ngModelChange)="onSearchDateChange($event)">
+      </div>
       <button class="btn btn-primary shadow-sm text-nowrap" (click)="openModal()">
         <i class="ri-add-line me-1"></i> Nueva Guía
       </button>
@@ -36,7 +41,7 @@
                   }}</span></td>
               <td>{{ guide.issue_date ? (guide.issue_date | date:'dd/MM/yyyy') : 'N/A' }}</td>
               <td>
-                @if (guide.attached_file) {
+                @if (guide.attached_file && guide.attached_file !== 'pending') {
                 <a [href]="getDownloadUrl(guide.attached_file)" target="_blank"
                   class="btn btn-sm btn-outline-info shadow-sm px-2 py-1" title="Ver Archivo">
                   <i class="ri-file-download-line"></i> Descargar
