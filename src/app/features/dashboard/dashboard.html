@@ -185,9 +185,9 @@
           <div class="card-header bg-white border-0 pt-4 pb-0">
             <h5 class="card-title mb-0">
               Tendencia de Ingresos 
-              <span class="text-muted fw-normal fs-6">
-                ({{ filterDate() ? 'Diario del mes seleccionado' : 'Mensual del año actual' }})
-              </span>
+                <span class="text-muted fw-normal fs-6">
+                  ({{ (dateFrom() && dateTo()) ? 'Por rango: ' + dateFrom() + ' al ' + dateTo() : 'Mensual del año actual' }})
+                </span>
             </h5>
           </div>
           <div class="card-body" style="min-height: 300px;">
