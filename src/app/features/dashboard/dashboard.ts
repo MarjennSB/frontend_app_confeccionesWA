@@ -16,7 +16,8 @@ export class DashboardComponent implements OnInit {
   
   isLoading = signal<boolean>(true);
   stats = signal<DashboardData | null>(null);
-  filterDate = signal<string>('');
+  dateFrom = signal<string>('');
+  dateTo = signal<string>('');
 
   @ViewChild('donutCanvas') donutCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
@@ -29,21 +30,30 @@ export class DashboardComponent implements OnInit {
     this.loadDashboardData();
   }
 
-  onDateChange(date: string): void {
-    this.filterDate.set(date);
+  onDateFromChange(date: string): void {
+    this.dateFrom.set(date);
+    this.loadDashboardData();
+  }
+
+  onDateToChange(date: string): void {
+    this.dateTo.set(date);
+    this.loadDashboardData();
+  }
+
+  clearFilter(): void {
+    this.dateFrom.set('');
+    this.dateTo.set('');
     this.loadDashboardData();
   }
 
   loadDashboardData(): void {
     this.isLoading.set(true);
-    this.dashboardService.getDashboardData(this.filterDate()).subscribe({
+    this.dashboardService.getDashboardData(this.dateFrom(), this.dateTo()).subscribe({
       next: (res) => {
         if (res.success) {
           this.stats.set(res.data);
         }
         this.isLoading.set(false);
-        // Usamos setTimeout con un pequeño retraso para asegurar que Angular
-        // haya destruido el spinner de carga y pintado los canvas en el DOM.
         setTimeout(() => {
           this.renderCharts();
         }, 150);
@@ -134,36 +144,36 @@ export class DashboardComponent implements OnInit {
     // Renderizar Líneas (Tendencia de Ingresos)
     const incomeLineCanvas = document.getElementById('incomeLineCanvas') as HTMLCanvasElement;
     if (incomeLineCanvas) {
-      const isDaily = !!this.filterDate();
+      const hasRange = !!(this.dateFrom() && this.dateTo());
       const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      
+
       let labels: string[] = [];
       let valuesPagadas: number[] = [];
       let valuesPendientes: number[] = [];
 
-      if (!isDaily) {
+      if (hasRange) {
+        // Vista de rango: cada punto es una fecha (label = 'YYYY-MM-DD')
+        const uniqueDates = [...new Set(data.income_trend.map(i => i.label.toString()))].sort();
+        labels = uniqueDates.map(d => {
+          const parts = d.split('-');
+          return `${parts[2]}/${parts[1]}`;
+        });
+        valuesPagadas = uniqueDates.map(d => {
+          const found = data.income_trend.find(i => i.label.toString() === d && i.payment_status === 'PAGADA');
+          return found ? Number(found.total) : 0;
+        });
+        valuesPendientes = uniqueDates.map(d => {
+          const found = data.income_trend.find(i => i.label.toString() === d && i.payment_status === 'PENDIENTE');
+          return found ? Number(found.total) : 0;
+        });
+      } else {
+        // Vista mensual del año
         labels = monthNames;
         valuesPagadas = Array(12).fill(0);
         valuesPendientes = Array(12).fill(0);
-        
         data.income_trend.forEach(item => {
           const index = parseInt(item.label.toString()) - 1;
           if (index >= 0 && index < 12) {
-            if (item.payment_status === 'PAGADA') valuesPagadas[index] = Number(item.total);
-            if (item.payment_status === 'PENDIENTE') valuesPendientes[index] = Number(item.total);
-          }
-        });
-      } else {
-        const selectedDate = new Date(this.filterDate());
-        const lastDay = new Date(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth() + 1, 0).getDate();
-        
-        labels = Array.from({length: lastDay}, (_, i) => `Día ${i + 1}`);
-        valuesPagadas = Array(lastDay).fill(0);
-        valuesPendientes = Array(lastDay).fill(0);
-        
-        data.income_trend.forEach(item => {
-          const index = parseInt(item.label.toString()) - 1;
-          if (index >= 0 && index < lastDay) {
             if (item.payment_status === 'PAGADA') valuesPagadas[index] = Number(item.total);
             if (item.payment_status === 'PENDIENTE') valuesPendientes[index] = Number(item.total);
           }

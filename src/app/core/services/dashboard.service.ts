@@ -43,10 +43,13 @@ export class DashboardService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/dashboard`;
 
-  getDashboardData(date?: string): Observable<DashboardResponse> {
+  getDashboardData(dateFrom?: string, dateTo?: string): Observable<DashboardResponse> {
     let params = new HttpParams();
-    if (date) {
-      params = params.set('date', date);
+    if (dateFrom) {
+      params = params.set('date_from', dateFrom);
+    }
+    if (dateTo) {
+      params = params.set('date_to', dateTo);
     }
     return this.http.get<DashboardResponse>(this.apiUrl, { params });
   }
