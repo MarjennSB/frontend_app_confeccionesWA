@@ -1,32 +1,32 @@
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4 d-print-none">
     <h2 class="h4 mb-0 text-gray-800">Lista de Produccion</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <div class="input-group shadow-sm d-print-none" style="width: 200px;">
+    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-lg-end">
+      <div class="input-group shadow-sm d-print-none flex-grow-1" style="min-width: 150px; max-width: 200px;">
         <span class="input-group-text border-end-0"><i class="ri-calendar-line text-muted"></i></span>
         <input type="date" class="form-control border-start-0 ps-0" [ngModel]="filterDate()"
           (ngModelChange)="onDateChange($event)">
       </div>
-      <div class="input-group shadow-sm d-print-none" style="width: 250px;">
+      <div class="input-group shadow-sm d-print-none flex-grow-1" style="min-width: 200px; max-width: 250px;">
         <span class="input-group-text border-end-0"><i class="ri-search-line text-muted"></i></span>
         <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar O/P u O/C..."
           [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
       </div>
-      <button class="btn btn-success shadow-sm text-nowrap d-print-none"
+      <button class="btn btn-success shadow-sm text-nowrap d-print-none flex-grow-1 flex-sm-grow-0"
         (click)="exportToExcel()"
         [disabled]="isExporting()"
         title="Exportar a Excel">
         @if (isExporting()) {
           <span class="spinner-border spinner-border-sm me-1" role="status"></span> Exportando...
         } @else {
-          <i class="ri-file-excel-2-line me-1"></i> Exportar Excel
+          <i class="ri-file-excel-2-line me-1"></i> Exportar
         }
       </button>
-      <button class="btn btn-secondary shadow-sm text-nowrap d-print-none" (click)="printReport()"
+      <button class="btn btn-secondary shadow-sm text-nowrap d-print-none flex-grow-1 flex-sm-grow-0" (click)="printReport()"
         title="Imprimir Reporte">
         <i class="ri-printer-line me-1"></i> Imprimir
       </button>
-      <button class="btn btn-primary shadow-sm text-nowrap d-print-none" (click)="openModal()">
+      <button class="btn btn-primary shadow-sm text-nowrap d-print-none flex-grow-1 flex-sm-grow-0" (click)="openModal()">
         <i class="ri-add-line me-1"></i> Nueva Producción
       </button>
     </div>
