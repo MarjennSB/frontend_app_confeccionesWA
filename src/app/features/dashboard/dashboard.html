@@ -1,8 +1,8 @@
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
     <h2 class="h4 mb-0 text-gray-800">Dashboard General</h2>
     <div class="d-flex align-items-center">
-      <div class="input-group shadow-sm" style="width: 250px;">
+      <div class="input-group shadow-sm w-auto">
         <span class="input-group-text border-end-0 bg-white"><i class="ri-calendar-line text-muted"></i></span>
         <input type="date" class="form-control border-start-0 ps-0" [ngModel]="filterDate()"
           (ngModelChange)="onDateChange($event)" title="Filtrar Totales por Fecha">

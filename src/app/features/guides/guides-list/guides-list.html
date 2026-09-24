@@ -1,18 +1,18 @@
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
     <h2 class="h4 mb-0 text-gray-800">Lista de Guías de Remisión</h2>
-    <div class="d-flex gap-3">
-      <div class="input-group shadow-sm" style="width: 280px;">
+    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-lg-end">
+      <div class="input-group shadow-sm flex-grow-1" style="min-width: 200px; max-width: 280px;">
         <span class="input-group-text border-end-0"><i class="ri-search-line text-muted"></i></span>
         <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por número..."
           [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
       </div>
-      <div class="input-group shadow-sm" style="width: 200px;">
+      <div class="input-group shadow-sm flex-grow-1" style="min-width: 150px; max-width: 200px;">
         <span class="input-group-text bg-white border-end-0"><i class="ri-calendar-line text-muted"></i></span>
         <input type="date" class="form-control border-start-0 ps-0 text-muted" title="Filtrar por Fecha de Emisión"
           [ngModel]="searchDate()" (ngModelChange)="onSearchDateChange($event)">
       </div>
-      <button class="btn btn-primary shadow-sm text-nowrap" (click)="openModal()">
+      <button class="btn btn-primary shadow-sm text-nowrap flex-grow-1 flex-sm-grow-0" (click)="openModal()">
         <i class="ri-add-line me-1"></i> Nueva Guía
       </button>
     </div>
