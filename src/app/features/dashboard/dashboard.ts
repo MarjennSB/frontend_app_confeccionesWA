@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +13,7 @@ import Chart from 'chart.js/auto';
 })
 export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
-  
+
   isLoading = signal<boolean>(true);
   stats = signal<DashboardData | null>(null);
   dateFrom = signal<string>('');
@@ -54,9 +54,7 @@ export class DashboardComponent implements OnInit {
           this.stats.set(res.data);
         }
         this.isLoading.set(false);
-        setTimeout(() => {
-          this.renderCharts();
-        }, 150);
+        setTimeout(() => { this.renderCharts(); }, 150);
       },
       error: (err) => {
         console.error('Error cargando dashboard', err);
@@ -69,18 +67,11 @@ export class DashboardComponent implements OnInit {
     const data = this.stats();
     if (!data) return;
 
-    // Destruir gráficos anteriores si existen
-    if (this.donutChartInstance) {
-      this.donutChartInstance.destroy();
-    }
-    if (this.barChartInstance) {
-      this.barChartInstance.destroy();
-    }
-    if (this.incomeLineChartInstance) {
-      this.incomeLineChartInstance.destroy();
-    }
+    if (this.donutChartInstance) this.donutChartInstance.destroy();
+    if (this.barChartInstance) this.barChartInstance.destroy();
+    if (this.incomeLineChartInstance) this.incomeLineChartInstance.destroy();
 
-    // Renderizar Dona (Facturas)
+    // --- Gráfico de Dona (Estado de Facturas) ---
     const donutCanvas = document.getElementById('donutCanvas') as HTMLCanvasElement;
     if (donutCanvas) {
       this.donutChartInstance = new Chart(donutCanvas, {
@@ -89,36 +80,29 @@ export class DashboardComponent implements OnInit {
           labels: ['Pagadas', 'Pendientes'],
           datasets: [{
             data: [data.donut_chart.pagadas, data.donut_chart.pendientes],
-            backgroundColor: ['#198754', '#dc3545'], // Bootstrap success/danger colors
+            backgroundColor: ['#198754', '#dc3545'],
             hoverOffset: 4
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
+          plugins: { legend: { position: 'bottom' } }
         }
       });
     }
 
-    // Renderizar Barras (Producción 7 días)
+    // --- Gráfico de Barras (Tendencia de Producción) ---
     const barCanvas = document.getElementById('barCanvas') as HTMLCanvasElement;
     if (barCanvas) {
-      const labels = data.bar_chart.map(item => item.date);
-      const values = data.bar_chart.map(item => item.total);
-
       this.barChartInstance = new Chart(barCanvas, {
         type: 'bar',
         data: {
-          labels: labels,
+          labels: data.bar_chart.map(item => item.date),
           datasets: [{
             label: 'Prendas Producidas',
-            data: values,
-            backgroundColor: '#0d6efd', // Bootstrap primary color
+            data: data.bar_chart.map(item => item.total),
+            backgroundColor: '#0d6efd',
             borderRadius: 4,
             maxBarThickness: 40
           }]
@@ -127,23 +111,15 @@ export class DashboardComponent implements OnInit {
           indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
-          scales: {
-            x: {
-              beginAtZero: true
-            }
-          },
-          plugins: {
-            legend: {
-              display: false
-            }
-          }
+          scales: { x: { beginAtZero: true } },
+          plugins: { legend: { display: false } }
         }
       });
     }
 
-    // Renderizar Líneas (Tendencia de Ingresos)
-    const incomeLineCanvas = document.getElementById('incomeLineCanvas') as HTMLCanvasElement;
-    if (incomeLineCanvas) {
+    // --- Gráfico de Ingresos (Barras en rango, Líneas en mensual) ---
+    const incomeCanvas = document.getElementById('incomeLineCanvas') as HTMLCanvasElement;
+    if (incomeCanvas) {
       const hasRange = !!(this.dateFrom() && this.dateTo());
       const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
@@ -152,7 +128,6 @@ export class DashboardComponent implements OnInit {
       let valuesPendientes: number[] = [];
 
       if (hasRange) {
-        // Vista de rango: cada punto es una fecha (label = 'YYYY-MM-DD')
         const uniqueDates = [...new Set(data.income_trend.map(i => i.label.toString()))].sort();
         labels = uniqueDates.map(d => {
           const parts = d.split('-');
@@ -167,7 +142,6 @@ export class DashboardComponent implements OnInit {
           return found ? Number(found.total) : 0;
         });
       } else {
-        // Vista mensual del año
         labels = monthNames;
         valuesPagadas = Array(12).fill(0);
         valuesPendientes = Array(12).fill(0);
@@ -180,63 +154,99 @@ export class DashboardComponent implements OnInit {
         });
       }
 
-      this.incomeLineChartInstance = new Chart(incomeLineCanvas, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Ingresos Pagados (USD)',
-              data: valuesPagadas,
-              borderColor: '#198754', // success color
-              backgroundColor: 'rgba(25, 135, 84, 0.2)',
-              borderWidth: 2,
-              pointBackgroundColor: '#198754',
-              fill: true,
-              tension: 0.4
-            },
-            {
-              label: 'Ingresos Pendientes (USD)',
-              data: valuesPendientes,
-              borderColor: '#dc3545', // danger color
-              backgroundColor: 'rgba(220, 53, 69, 0.1)',
-              borderWidth: 2,
-              pointBackgroundColor: '#dc3545',
-              fill: true,
-              tension: 0.4
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
+      const tooltipFn = (context: any) => {
+        let label = context.dataset.label || '';
+        if (label) label += ': ';
+        if (context.parsed.y !== null) {
+          label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+        }
+        return label;
+      };
+
+      if (hasRange) {
+        // BARRAS AGRUPADAS: se ve bien con 1 o más días
+        this.incomeLineChartInstance = new Chart(incomeCanvas, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Pagados (USD)',
+                data: valuesPagadas,
+                backgroundColor: 'rgba(25, 135, 84, 0.85)',
+                borderColor: '#198754',
+                borderWidth: 1,
+                borderRadius: 6,
+                maxBarThickness: 70
+              } as any,
+              {
+                label: 'Pendientes (USD)',
+                data: valuesPendientes,
+                backgroundColor: 'rgba(220, 53, 69, 0.85)',
+                borderColor: '#dc3545',
+                borderWidth: 1,
+                borderRadius: 6,
+                maxBarThickness: 70
+              } as any
+            ]
           },
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top'
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  let label = context.dataset.label || '';
-                  if (label) {
-                    label += ': ';
-                  }
-                  if (context.parsed.y !== null) {
-                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
-                  }
-                  return label;
-                }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { callback: (v: any) => '$' + Number(v).toLocaleString('en-US') }
               }
+            },
+            plugins: {
+              legend: { display: true, position: 'top' },
+              tooltip: { callbacks: { label: tooltipFn } }
             }
           }
-        }
-      });
+        });
+      } else {
+        // LÍNEAS: vista mensual del año
+        this.incomeLineChartInstance = new Chart(incomeCanvas, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Ingresos Pagados (USD)',
+                data: valuesPagadas,
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                borderWidth: 2,
+                pointBackgroundColor: '#198754',
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4
+              },
+              {
+                label: 'Ingresos Pendientes (USD)',
+                data: valuesPendientes,
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#dc3545',
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: {
+              legend: { display: true, position: 'top' },
+              tooltip: { callbacks: { label: tooltipFn } }
+            }
+          }
+        });
+      }
     }
   }
 }
