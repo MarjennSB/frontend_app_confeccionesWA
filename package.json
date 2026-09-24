@@ -30,10 +30,12 @@
     "@angular/router": "^20.3.0",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
+    "exceljs": "^4.4.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "vis-data": "^8.0.5",
     "vis-network": "^10.1.2",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

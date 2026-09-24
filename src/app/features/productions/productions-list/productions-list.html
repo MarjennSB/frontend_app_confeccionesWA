@@ -12,6 +12,16 @@
         <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar O/P u O/C..."
           [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)">
       </div>
+      <button class="btn btn-success shadow-sm text-nowrap d-print-none"
+        (click)="exportToExcel()"
+        [disabled]="isExporting()"
+        title="Exportar a Excel">
+        @if (isExporting()) {
+          <span class="spinner-border spinner-border-sm me-1" role="status"></span> Exportando...
+        } @else {
+          <i class="ri-file-excel-2-line me-1"></i> Exportar Excel
+        }
+      </button>
       <button class="btn btn-secondary shadow-sm text-nowrap d-print-none" (click)="printReport()"
         title="Imprimir Reporte">
         <i class="ri-printer-line me-1"></i> Imprimir
