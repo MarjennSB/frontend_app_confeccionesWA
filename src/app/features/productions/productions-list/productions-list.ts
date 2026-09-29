@@ -185,7 +185,7 @@ export class ProductionsListComponent implements OnInit {
             prod.production_order_number,
             prod.purchase_order_number,
             colores,
-            prod.unit_price,
+            parseFloat(Number(prod.unit_price).toFixed(2)),
             guias,
           ]);
           dataRow.height = 18;
