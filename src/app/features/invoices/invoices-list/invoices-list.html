@@ -135,15 +135,13 @@
     }
   </div>
 
-  <div class="row row-cols-3 row-cols-md-4 g-3 ms-2 me-2 mt-2">
+  <div class="d-flex flex-column gap-2 text-start ms-4">
     @for (invoice of printInvoices(); track invoice.id; let i = $index) {
-    <div class="col">
-      <div class="fw-bold fs-5 p-2 border rounded text-center">
-        {{ i + 1 }}. {{ invoice.invoice_number }}
-      </div>
+    <div class="fw-bold fs-5">
+      {{ i + 1 }}. {{ invoice.invoice_number }}
     </div>
     } @empty {
-    <div class="col-12 text-center text-muted mt-5 w-100">
+    <div class="text-center text-muted mt-5 w-100">
       <h4>No se encontraron facturas para esta fecha.</h4>
     </div>
     }
