@@ -23,6 +23,10 @@ export class InvoicesListComponent implements OnInit {
   readonly currentPage = signal<number>(1);
   readonly totalPages = signal<number>(1);
   readonly totalItems = signal<number>(0);
+  
+  readonly isPrinting = signal<boolean>(false);
+  readonly printInvoices = signal<Invoice[]>([]);
+  
   private searchTimeout: any;
 
   ngOnInit(): void {
@@ -47,7 +51,19 @@ export class InvoicesListComponent implements OnInit {
   }
 
   printReport(): void {
-    window.print();
+    this.isPrinting.set(true);
+    // Pedir hasta 1000 facturas para imprimir todas las de la fecha actual sin paginación
+    this.invoicesService.getInvoices(this.searchTerm(), this.filterDate(), 1, 1000).subscribe({
+      next: (res) => {
+        this.printInvoices.set(res.invoices.data);
+        this.isPrinting.set(false);
+        setTimeout(() => window.print(), 100);
+      },
+      error: (err: any) => {
+        console.error('Error al cargar facturas para imprimir', err);
+        this.isPrinting.set(false);
+      }
+    });
   }
 
   loadInvoices(): void {
