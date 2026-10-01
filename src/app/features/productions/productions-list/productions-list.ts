@@ -38,6 +38,17 @@ export class ProductionsListComponent implements OnInit {
   readonly printProductions = signal<Production[]>([]);
   readonly printSubtitle = signal<string>('');
 
+  /** Divide las producciones en páginas de 15 filas para la hoja impresa */
+  get printPages(): Production[][] {
+    const all = this.printProductions();
+    const pages: Production[][] = [];
+    for (let i = 0; i < all.length; i += 15) {
+      pages.push(all.slice(i, i + 15));
+    }
+    if (pages.length === 0) pages.push([]);
+    return pages;
+  }
+
   private searchTimeout: any;
 
   ngOnInit(): void {
