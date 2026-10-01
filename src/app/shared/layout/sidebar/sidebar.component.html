@@ -1,14 +1,14 @@
 <div class="app-menu navbar-menu">
   <!-- LOGO -->
-  <div class="navbar-brand-box" style="padding-top: 16px; padding-bottom: 10px;">
-    <a routerLink="/" class="logo d-flex align-items-center justify-content-center">
+  <div class="navbar-brand-box" style="padding-top: 16px; padding-bottom: 10px; display: flex !important; justify-content: center;">
+    <a routerLink="/" class="logo d-flex align-items-center justify-content-center w-100">
       <span class="logo-sm">
-        <img src="assets/images/logo_acevedo_transparent.png" alt="Acevedo" height="52"
-          style="object-fit:contain; display:block; mix-blend-mode: multiply;">
+        <img src="assets/images/logo_confeccioneswa@.png" alt="Acevedo" height="52"
+          style="object-fit:contain; display:block; filter: invert(1) brightness(2);">
       </span>
       <span class="logo-lg">
-        <img src="assets/images/logo_acevedo_transparent.png" alt="Acevedo" height="90"
-          style="object-fit:contain; display:block; mix-blend-mode: multiply;">
+        <img src="assets/images/logo_confeccioneswa@.png" alt="Acevedo" height="90"
+          style="object-fit:contain; display:block; filter: invert(1) brightness(2);">
       </span>
     </a>
     <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -28,8 +28,6 @@
           </a>
         </li>
         }
-
-
 
         @if (tokenService.hasRole('AD', 'OP')) {
         <li class="nav-item">
