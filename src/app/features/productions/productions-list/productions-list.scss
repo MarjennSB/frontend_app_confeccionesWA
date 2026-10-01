@@ -29,9 +29,25 @@
     font-weight: 700;
     letter-spacing: 2px;
     text-align: center;
-    margin: 0 0 12px 0;
+    margin: 0 0 4px 0;
     text-transform: uppercase;
     color: #111;
+  }
+
+  .print-report-subtitle {
+    font-size: 10px;
+    text-align: center;
+    color: #444;
+    margin: 0 0 10px 0;
+    font-style: italic;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+    height: 0;
+    margin: 0;
+    padding: 0;
   }
 
   .print-table {

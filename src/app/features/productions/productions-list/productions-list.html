@@ -23,8 +23,13 @@
         }
       </button>
       <button class="btn btn-secondary shadow-sm text-nowrap d-print-none flex-grow-1 flex-sm-grow-0" (click)="printReport()"
+        [disabled]="isPrinting()"
         title="Imprimir Reporte">
-        <i class="ri-printer-line me-1"></i> Imprimir
+        @if (isPrinting()) {
+          <span class="spinner-border spinner-border-sm me-1" role="status"></span> Cargando...
+        } @else {
+          <i class="ri-printer-line me-1"></i> Imprimir
+        }
       </button>
       <button class="btn btn-primary shadow-sm text-nowrap d-print-none flex-grow-1 flex-sm-grow-0" (click)="openModal()">
         <i class="ri-add-line me-1"></i> Nueva Producción
@@ -233,11 +238,62 @@
 <div class="d-none d-print-block print-wrapper">
 
   <h2 class="print-report-title">HOJA DE RESUMEN</h2>
+  <p class="print-report-subtitle">{{ printSubtitle() }}</p>
 
-  <!-- Tabla de Datos -->
-  <table class="print-table">
-    <thead>
-      <tr>
+  <!-- Tabla de Datos con salto de página cada 15 filas -->
+  @for (prod of printProductions(); track prod.id; let i = $index) {
+    @if (i % 15 === 0) {
+      <!-- Inicio de nuevo bloque de página -->
+      @if (i > 0) {
+        <!-- Cierre de tabla anterior y salto de página -->
+        </tbody></table>
+        <div class="page-break"></div>
+        <h2 class="print-report-title">HOJA DE RESUMEN</h2>
+        <p class="print-report-subtitle">{{ printSubtitle() }}</p>
+      }
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-qty">CANTIDAD</th>
+            <th class="col-op">Nro. O/P</th>
+            <th class="col-oc">Nro. O/C</th>
+            <th class="col-color">COLOR</th>
+            <th class="col-pv">P.U</th>
+            <th class="col-guides">GUÍAS</th>
+          </tr>
+        </thead>
+        <tbody>
+    }
+    <tr>
+      <td class="text-center">{{ i + 1 }}</td>
+      <td class="text-center fw-bold">{{ prod.quantity }}</td>
+      <td>{{ prod.production_order_number }}</td>
+      <td>{{ prod.purchase_order_number }}</td>
+      <td>
+        @for (c of prod.colors; track c.id; let last = $last) {
+          {{ c.name }}{{ !last ? ', ' : '' }}
+        }
+      </td>
+      <td class="text-center">
+        @if (prod.unit_price) { {{ prod.unit_price | number:'1.2-2' }} }
+        @else { — }
+      </td>
+      <td>
+        @for (g of prod.guides; track g.id; let last = $last) {
+          {{ g.guide_number }}{{ !last ? ', ' : '' }}
+        }
+      </td>
+    </tr>
+    @if (i === printProductions().length - 1) {
+      <!-- Cierre de última tabla -->
+      </tbody></table>
+    }
+  }
+
+  @if (printProductions().length === 0) {
+    <table class="print-table">
+      <thead><tr>
         <th class="col-num">#</th>
         <th class="col-qty">CANTIDAD</th>
         <th class="col-op">Nro. O/P</th>
@@ -245,32 +301,9 @@
         <th class="col-color">COLOR</th>
         <th class="col-pv">P.U</th>
         <th class="col-guides">GUÍAS</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (prod of productions(); track prod.id; let i = $index) {
-      <tr>
-        <td class="text-center">{{ i + 1 }}</td>
-        <td class="text-center fw-bold">{{ prod.quantity }}</td>
-        <td>{{ prod.production_order_number }}</td>
-        <td>{{ prod.purchase_order_number }}</td>
-        <td>
-          @for (c of prod.colors; track c.id; let last = $last) {
-          {{ c.name }}{{ !last ? ', ' : '' }}
-          }
-        </td>
-        <td class="text-center">
-          @if (prod.unit_price) { {{ prod.unit_price | number:'1.2-2' }} }
-          @else { — }
-        </td>
-        <td>
-          @for (g of prod.guides; track g.id; let last = $last) {
-          {{ g.guide_number }}{{ !last ? ', ' : '' }}
-          }
-        </td>
-      </tr>
-      }
-    </tbody>
-  </table>
+      </tr></thead>
+      <tbody><tr><td colspan="7" style="text-align:center">Sin registros para esta fecha.</td></tr></tbody>
+    </table>
+  }
 
 </div>

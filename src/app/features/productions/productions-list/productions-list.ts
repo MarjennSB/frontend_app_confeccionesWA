@@ -32,6 +32,11 @@ export class ProductionsListComponent implements OnInit {
 
   readonly showPrintWarning = signal<boolean>(false);
   readonly isExporting = signal<boolean>(false);
+  readonly isPrinting = signal<boolean>(false);
+
+  // Datos completos para impresión (sin paginación)
+  readonly printProductions = signal<Production[]>([]);
+  readonly printSubtitle = signal<string>('');
 
   private searchTimeout: any;
 
@@ -81,7 +86,23 @@ export class ProductionsListComponent implements OnInit {
       this.showPrintWarning.set(true);
       return;
     }
-    window.print();
+    this.isPrinting.set(true);
+    // Traer TODOS los registros del día (sin límite de paginación)
+    this.productionsService.getProductions(this.searchTerm(), 1, 1000, this.filterDate()).subscribe({
+      next: (res) => {
+        this.printProductions.set(res.productions.data);
+        const dateLabel = this.formatDateLabel(this.filterDate());
+        this.printSubtitle.set(
+          `CONFECCIONES WA — Reporte de Producción | Fecha: ${dateLabel} | Generado: ${new Date().toLocaleString('es-PE')}`
+        );
+        this.isPrinting.set(false);
+        setTimeout(() => window.print(), 100);
+      },
+      error: (err: any) => {
+        console.error('Error al cargar producciones para imprimir', err);
+        this.isPrinting.set(false);
+      }
+    });
   }
 
   closePrintWarning(): void {
