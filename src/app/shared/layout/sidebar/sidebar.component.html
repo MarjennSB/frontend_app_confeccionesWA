@@ -20,15 +20,18 @@
     <div class="container-fluid">
       <ul class="navbar-nav mt-4" id="navbar-nav">
 
+        @if (tokenService.hasRole('AD', 'GT')) {
         <li class="nav-item">
           <a routerLink="/dashboard" routerLinkActive="active" class="nav-link menu-link">
             <i class="ri-dashboard-3-line"></i>
             <span>Dashboard</span>
           </a>
         </li>
+        }
 
-        @if (tokenService.hasRole('ADMINISTRADOR')) {
 
+
+        @if (tokenService.hasRole('AD', 'OP')) {
         <li class="nav-item">
           <a class="nav-link menu-link" href="#sidebarMantenimiento" data-bs-toggle="collapse" role="button"
             aria-expanded="false" aria-controls="sidebarMantenimiento">
@@ -55,20 +58,27 @@
             </ul>
           </div>
         </li>
+        }
 
+        @if (tokenService.hasRole('AD')) {
         <li class="nav-item">
           <a routerLink="/productions" routerLinkActive="active" class="nav-link menu-link">
             <i class="ri-t-shirt-line"></i>
             <span>Produccion</span>
           </a>
         </li>
+        }
+
+        @if (tokenService.hasRole('AD', 'CT')) {
         <li class="nav-item">
           <a routerLink="/invoices" routerLinkActive="active" class="nav-link menu-link">
             <i class="ri-bill-line"></i>
             <span>factura</span>
           </a>
         </li>
+        }
 
+        @if (tokenService.hasRole('AD')) {
         <li class="nav-item">
           <a class="nav-link menu-link" href="#sidebarSeguridad" data-bs-toggle="collapse" role="button"
             aria-expanded="false" aria-controls="sidebarSeguridad">
