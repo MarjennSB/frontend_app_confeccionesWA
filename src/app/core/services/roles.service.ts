@@ -9,6 +9,11 @@ export class RolesService {
   private readonly http   = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/roles`;
 
+  /** GET /api/roles/permisos */
+  getPermissions(): Observable<{ permisos: any[] }> {
+    return this.http.get<{ permisos: any[] }>(`${this.apiUrl}/permisos`);
+  }
+
   /** GET /api/roles?search= */
   getRoles(search: string = ''): Observable<RoleListResponse> {
     const params = new HttpParams().set('search', search);
