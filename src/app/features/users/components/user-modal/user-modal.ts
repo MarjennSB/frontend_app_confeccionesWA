@@ -36,7 +36,7 @@ export class UserModalComponent {
   readonly isEditMode = signal(false);
 
   userForm: FormGroup = this.fb.group({
-    first_name: ['', Validators.required],
+    name: ['', Validators.required],
     last_name_father: ['', Validators.required],
     last_name_mother: ['', Validators.required],
     document_type_id: ['', Validators.required],
@@ -44,7 +44,7 @@ export class UserModalComponent {
     gender_id: [''],
     email: ['', [Validators.required, Validators.email]],
     password: [''],
-    role_id: ['', Validators.required],
+    rol_id: ['', Validators.required],
     is_active: [true]
   });
 
@@ -56,7 +56,7 @@ export class UserModalComponent {
         if (currentUser) {
           this.isEditMode.set(true);
           this.userForm.patchValue({
-            first_name: currentUser.first_name,
+            name: currentUser.name,
             last_name_father: currentUser.last_name_father,
             last_name_mother: currentUser.last_name_mother,
             document_type_id: currentUser.document_type_id,
@@ -64,7 +64,7 @@ export class UserModalComponent {
             gender_id: currentUser.gender_id,
             email: currentUser.email,
             password: '',
-            role_id: currentUser.roles && currentUser.roles.length > 0 ? currentUser.roles[0].id : '',
+            rol_id: currentUser.roles && currentUser.roles.length > 0 ? currentUser.roles[0].id : '',
             is_active: currentUser.is_active
           });
           this.userForm.get('password')?.clearValidators();

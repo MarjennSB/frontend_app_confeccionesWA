@@ -13,7 +13,7 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-medium">Nombres <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" formControlName="first_name" placeholder="Ej. Juan">
+              <input type="text" class="form-control" formControlName="name" placeholder="Ej. Juan">
             </div>
             <div class="col-md-3">
               <label class="form-label fw-medium">Ap. Paterno <span class="text-danger">*</span></label>
@@ -28,7 +28,7 @@
               <label class="form-label fw-medium">Tipo Doc <span class="text-danger">*</span></label>
               <select class="form-select" formControlName="document_type_id">
                 <option [ngValue]="null" disabled>Seleccione un tipo de documento</option>
-                @for(doc of documentTypes(); track doc.id) { <option [value]="doc.id">{{ doc.name }}</option> }
+                @for(doc of documentTypes(); track doc.id) { <option [ngValue]="doc.id">{{ doc.name }}</option> }
 
 
               </select>
@@ -41,7 +41,7 @@
               <label class="form-label fw-medium">Género</label>
               <select class="form-select" formControlName="gender_id">
                 <option [ngValue]="null" disabled>Seleccione un género</option>
-                @for(genre of genres(); track genre.id) { <option [value]="genre.id">{{ genre.name }}</option> }
+                @for(genre of genres(); track genre.id) { <option [ngValue]="genre.id">{{ genre.name }}</option> }
 
               </select>
             </div>
@@ -62,10 +62,10 @@
 
             <div class="col-md-6">
               <label class="form-label fw-medium">Rol <span class="text-danger">*</span></label>
-              <select class="form-select" formControlName="role_id">
+              <select class="form-select" formControlName="rol_id">
                 <option [ngValue]="null" disabled>Seleccione un rol</option>
                 @for(role of roles(); track role.id) {
-                <option [value]="role.id">{{ role.name }}</option>
+                <option [ngValue]="role.id">{{ role.name }}</option>
                 }
               </select>
             </div>
