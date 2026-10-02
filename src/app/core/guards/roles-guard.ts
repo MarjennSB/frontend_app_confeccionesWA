@@ -31,6 +31,5 @@ export const rolesGuard: CanActivateFn = (route) => {
     return true;
   }
 
-  router.navigate(['/unauthorized']);
-  return false;
+  return router.createUrlTree(['/unauthorized']);
 };

@@ -1,10 +1,18 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { TokenService } from '../../core/services/token.service';
 
 @Component({
   selector: 'app-unauthorized',
   standalone: true,
-  imports: [RouterLink],
   templateUrl: './unauthorized.html',
 })
-export class UnauthorizedComponent {}
+export class UnauthorizedComponent {
+  private tokenService = inject(TokenService);
+  private router = inject(Router);
+
+  goToLogin() {
+    this.tokenService.removeToken();
+    this.router.navigate(['/auth/login']);
+  }
+}

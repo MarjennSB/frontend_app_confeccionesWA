@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Production } from '../../../core/models/production.model';
 import { ProductionsService } from '../../../core/services/productions.service';
 import { ProductionModalComponent } from '../components/production-modal/production-modal';
-import ExcelJS from 'exceljs';
+import * as ExcelJS from 'exceljs';
 
 @Component({
   selector: 'app-productions-list',
@@ -192,7 +192,7 @@ export class ProductionsListComponent implements OnInit {
         };
         const hRow = ws.addRow(COLS.map(c => c.header));
         hRow.height = 22;
-        hRow.eachCell(cell => Object.assign(cell, headerStyle));
+        hRow.eachCell((cell: any) => Object.assign(cell, headerStyle));
 
         // ── FILAS DE DATOS ─────────────────────────────────────────────
         const borderThin: Partial<ExcelJS.Borders> = {
@@ -222,7 +222,7 @@ export class ProductionsListComponent implements OnInit {
           ]);
           dataRow.height = 18;
 
-          dataRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
+          dataRow.eachCell({ includeEmpty: true }, (cell: any, colNum: any) => {
             cell.border    = borderThin;
             cell.font      = { name: 'Calibri', size: 10 };
             cell.alignment = { vertical: 'middle', wrapText: true };
@@ -244,7 +244,7 @@ export class ProductionsListComponent implements OnInit {
         ws.addRow([]);
         const totalRow = ws.addRow(['', totalQty, '', '', '', '', `Total registros: ${data.length}`]);
         totalRow.height = 20;
-        totalRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
+        totalRow.eachCell({ includeEmpty: true }, (cell: any, colNum: any) => {
           cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A5F' } };
           cell.font   = { name: 'Calibri', bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
           cell.border = borderThin;
