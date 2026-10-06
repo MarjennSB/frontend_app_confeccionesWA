@@ -34,7 +34,7 @@
 
             <div class="col-md-12">
               <label class="form-label fw-medium">Archivo Adjunto</label>
-              <input type="file" class="form-control" (change)="onFileChange($event)">
+              <input type="file" class="form-control" accept="application/pdf,image/jpeg,image/png,image/jpg" (change)="onFileChange($event)">
               @if (fileError()) {
                 <small class="text-danger d-block mt-1">{{ fileError() }}</small>
               }

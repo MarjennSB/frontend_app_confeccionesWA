@@ -62,7 +62,7 @@
 
             <div class="col-md-6">
               <label class="form-label fw-medium">Archivo Adjunto <span class="text-danger">*</span></label>
-              <input type="file" class="form-control" [class.is-invalid]="fileError()" (change)="onFileChange($event)">
+              <input type="file" class="form-control" accept="application/pdf,image/jpeg,image/png,image/jpg" [class.is-invalid]="fileError()" (change)="onFileChange($event)">
               @if (fileError()) {
                 <div class="invalid-feedback">{{ fileError() }}</div>
               }

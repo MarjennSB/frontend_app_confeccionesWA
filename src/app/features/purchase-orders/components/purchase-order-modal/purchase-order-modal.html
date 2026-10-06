@@ -34,7 +34,7 @@
 
             <div class="col-md-6">
               <label class="form-label fw-medium">Archivo Adjunto</label>
-              <input type="file" class="form-control" (change)="onFileChange($event)">
+              <input type="file" class="form-control" accept="application/pdf,image/jpeg,image/png,image/jpg" (change)="onFileChange($event)">
               @if (isEditMode() && purchaseOrder()?.attached_file) {
                 <small class="text-muted d-block mt-1">Ya hay un archivo adjunto. Sube uno nuevo para reemplazarlo.</small>
               }
